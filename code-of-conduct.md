@@ -1,29 +1,19 @@
-Group Assignment
+#**How do we plan to collaborate?**
 
-In this assignment, you discuss in your group the following three questions:
+    - We plan to collaborate by working in pairs, and we will have regular online meetings via zoom or whatsapp call three times a week. We will use whatsapp for daily communication and meetings organisation, while we will keep track of progress and we communicate with TA's using Slack.
 
-    How do we plan to collaborate?
+#**How do we ensure that everyone in our group stays informed about the individual contributions?**
 
-    - We plan to collaborate by working in pairs, and we will have regular online meetings via zoom or what's app call
-    three times a week. We will use What's app for daily communication and meetings organization,
-    while we will keep track of progress and we communicate with TA's using Slack.
+    - We will synchronise who is assigned to do what during the call meetings and by checking Slack to make sure what is done.
 
-    How do we ensure that everyone in our group stays informed about the individual contributions?
+#**How do we ensure knowledge transfer among our team members?**
 
-    - We will synchornize who is assigned to do what during the call meetings and by checking Slack to make sure what
-    is done.
+    - We will make sure that all team members have contributed to each part of the project, by changing responsibilities throughout the project.
 
-    How do we ensure knowledge transfer among our team members?
+#**What is our usual communication plan?**
 
-    - We will make sure that all team members have contributed to each part of the project, by changing responsibilities
-    throughout the project.
+    - The Group meetings are planned to be held three times per week after every Tuesday and Wednesday lecture and on Saturdays using Zoom or Skype. Daily communication between team members will take place instead on whatsapp if needed.
 
-    What is our usual communication plan?
+#**How will we solve conflicts?**
 
-    - We will communicate using What's app daily, but we will have online calls every Tuesday and Thursday after the lecture
-    and Saturday.
-
-    How will we solve conflicts?
-
-    - We will discuss the problems internally during the meetings and if we can't find the solution, we will contact TA
-    for help.
+    - We will discuss the problems internally during the meetings and if we can't find any solution, we will contact TA for help.
