@@ -1,4 +1,4 @@
-## Content
+## Table 
 * [Steps to clone Repository](#steps-to-clone-Repository)
 * [Building the Program](#building-the-program)
 
