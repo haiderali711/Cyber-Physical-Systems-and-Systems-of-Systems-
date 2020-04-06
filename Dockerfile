@@ -23,7 +23,7 @@ RUN cd /opt/sources && \
 ##################################################
 # Section 2: Bundle the application.
 FROM ubuntu:18.04
-MAINTAINER Shab Pompeiano guspomsh@student.gu.se
+MAINTAINER Osman Osman gusosmos@student.gu.se
 
 RUN apt-get update -y && \
     apt-get upgrade -y && \
