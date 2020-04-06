@@ -61,15 +61,17 @@
 
 ### Commit message structure
 
-    1. Separate subject from body with a blank line
-    ..*
+    `git commit -m "<Subject line of the commit Message>
 
-    2. Limit the subject line to 50 characters
-    ..* The limitation for the git commit's main message should be no more longer than 50 characters.
+    <Body of the Message will be written here>"`
 
-    3. Capitalise the subject line
+    1. Separate subject from body with a blank line as
 
-    4. Do not end the subject line with a period
+    2. Subject line should be maximum 50 characters
+
+    3. Start the Subject line with a Capital letter
+
+    4. Do not end the subject line with a period (.)
 
     5. Use the imperative mood in the subject line
 
