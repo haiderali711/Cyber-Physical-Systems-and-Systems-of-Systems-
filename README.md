@@ -66,7 +66,7 @@
 >   
 >   Body of the Message will be written here"
 
-1.  Separate subject from body with a blank line as
+1.  Separate subject from body with a blank line as shown in the example above
 
 2.  Subject line should be maximum 50 characters
 
