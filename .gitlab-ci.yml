@@ -18,7 +18,7 @@ image: docker:19.03.8
 
 # Details about how to connect to the Docker service to run this build.
 variables:
-  DOCKER_HOST: tcp://172.18.0.0:2375
+  DOCKER_HOST: tcp://172.18.0.0
   DOCKER_TLS_CERTDIR: ""
 
 services:
