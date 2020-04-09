@@ -36,10 +36,8 @@ before_script:
 # This section describes what shall be done to build and test the project.
 build-and-test:
   tags:
-    - docker-build 
+    - docker-build
   stage: build
-  rules:
-    - if: $CI_COMMIT_TAG == null
   script:
     - docker build -f Dockerfile .
 
@@ -53,4 +51,3 @@ release:
   script:
     - docker build -f Dockerfile -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" .
     - docker push "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG"
-    
