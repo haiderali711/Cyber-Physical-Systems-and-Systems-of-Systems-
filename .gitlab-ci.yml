@@ -18,7 +18,7 @@ image: docker:latest
 
 # Details about how to connect to the Docker service to run this build.
 variables:
-  DOCKER_HOST: tcp://172.17.0.1
+  DOCKER_HOST: tcp://172.17.0.1:2375
   DOCKER_TLS_CERTDIR: ""
 
 services:
