@@ -1,4 +1,7 @@
 ## Content
+
+[![pipeline status](https://git.chalmers.se/courses/dit638/students/group_01/badges/master/pipeline.svg)](https://git.chalmers.se/courses/dit638/students/group_01/-/commits/master)
+
 *   [Steps to clone Repository](#steps-to-clone-repository)
 *   [Building the Program](#building-the-program)
 *   [Addition of new Features](#addition-of-new-features)
@@ -21,6 +24,7 @@
 5.  For a more interactive experience with Git, **Github Desktop** can also be used as the tool for working with the Git repository
 
 ### Building the Program
+
 1.  Install **Docker** on your Machine.
     *   If Working on **Linux**
         >   Follow the Instructions --> [HERE](https://docs.docker.com/install/linux/docker-ce/ubuntu/) to install Docker        
