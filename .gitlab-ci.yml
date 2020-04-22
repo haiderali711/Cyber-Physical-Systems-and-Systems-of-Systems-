@@ -27,7 +27,6 @@ services:
 stages:
   - build
   - deploy
-  - coverage
 
 # Display information before we start the build.
 before_script:
@@ -36,7 +35,6 @@ before_script:
   - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
   - g++ -std=c++11 -o runner TestPrimeChecker.cpp PrimeChecker.cpp
 
-coverage:
 
 # This section describes what shall be done to build and test the project.
 build-and-test:
