@@ -64,6 +64,6 @@ coverage:
     - shell
   stage: test
   before_script:
-    - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
+    - sudo apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
   script:
     - ls
