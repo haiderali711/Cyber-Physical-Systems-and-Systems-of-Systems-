@@ -59,7 +59,6 @@ release:
 
 
 coverage:
-  image: ubuntu:latest
   tags:
     - shell
   stage: test
