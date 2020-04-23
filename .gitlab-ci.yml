@@ -26,7 +26,9 @@ services:
 
 stages:
   - build
+  - test
   - deploy
+
 
 # Display information before we start the build.
 before_script:
@@ -57,16 +59,11 @@ release:
 
 
 coverage:
+  image: ubuntu:latest
   tags:
     - shell
-  stage: deploy
+  stage: test
   before_script:
     - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
   script:
     - ls
-    - g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp -o mybinary
-    - ./mybinary
-    - ls
-    - gcov helloworld.cpp
-    - lcov --directory . --capture --output-file coverage.info
-    - lcov --list coverage.info
