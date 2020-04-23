@@ -30,7 +30,7 @@ stages:
 
 # Display information before we start the build.
 before_script:
-  - sudo apt install docker.io
+  - apt-get -y install docker.io
   - docker info
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
