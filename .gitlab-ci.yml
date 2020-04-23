@@ -60,7 +60,7 @@ release:
 
 coverage:
   tags:
-    - shell
+    - shell-executor
   stage: test
   before_script:
     - sudo apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
