@@ -63,9 +63,9 @@ coverage:
     - shell-executor
   stage: test
   before_script:
-    - sudo -S apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
+    - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
   script:
     - ls
-    - sudo -S g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp -o mybinary
+    - g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp -o mybinary
     - ./mybinary
     - ls
