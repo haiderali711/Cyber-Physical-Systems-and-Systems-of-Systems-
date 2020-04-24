@@ -62,4 +62,4 @@ Coverage:
     - docker-build
   stage: test
   script:
-    - docker build -f Dockerfile1 .
+    - docker build -f DockerfileCoverage .

@@ -13,8 +13,9 @@ RUN cd /opt/sources && \
  	g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp PrimeChecker.cpp -o mybinary && \
 	./mybinary && ls && \
 	gcov helloworld.cpp PrimeChecker.cpp && \
-	lcov --directory . --capture --output-file coverage.info && \
-	genhtml -o coverage coverage.info && cp coverage.info /tmp
+	lcov --capture --directory . --output-file coverage.info && \
+	genhtml coverage.info --output-directory COVERAGE \
+	&& cp coverage /tmp
 
 #RUN cd /opt/sources && mkdir build && \
 #    cd build && \
@@ -23,11 +24,11 @@ RUN cd /opt/sources && \
 
 ##################################################
 # Section 2: Bundle the application.
-FROM ubuntu:18.04
+FROM busybox:latest
 MAINTAINER Haider Ali haiali@student.chalmers.se
 
-RUN apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y
+#RUN apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y
 
 WORKDIR /opt
-COPY --from=builder /tmp/coverage.info .
-ENTRYPOINT ["/opt/coverage.info"]
+COPY --from=builder /tmp/coverage .
+ENTRYPOINT ["/opt/coverage"]
