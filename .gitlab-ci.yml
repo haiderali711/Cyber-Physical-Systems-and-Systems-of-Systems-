@@ -58,12 +58,8 @@ release:
 
 Coverage:
   tags:
-    - docker-build
+    - shell
   stage: test
-  before_script:
-    - docker pull ubuntu:18.04
-    - docker run --rm -ti -v $PWD:/opt/sources ubuntu:18.04 /bin/bash
-    - cd /opt/sources
   script:
     - ls
     - g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp PrimeChecker.cpp -o mybinary
