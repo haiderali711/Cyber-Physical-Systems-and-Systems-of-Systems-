@@ -3,18 +3,17 @@
 FROM ubuntu:18.04 as builder
 MAINTAINER Haider Ali haiali@student.chalmers.se
 
-RUN apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y
-
-RUN apt-get install -y --no-install-recommends cmake build-essential \
-	gcc g++ gcovr ggcov lcov
+RUN apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y && apt-get install -y --no-install-recommends cmake build-essential gcc g++ gcovr ggcov lcov
+	
 
 ADD . /opt/sources
 WORKDIR /opt/sources
 
 RUN cd /opt/sources && \
- 	g++ -Wall --coverage -fprofile-arcs -ftest-coverage hell#oworld.cpp PrimeChecker.cpp -o mybinary && \
+ 	g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp PrimeChecker.cpp -o mybinary && \
 	./mybinary && ls && \
-	gcov helloworld.cpp && lcov --directory . --capture --output-file coverage.info && \
+	gcov helloworld.cpp PrimeChecker.cpp && \
+	lcov --directory . --capture --output-file coverage.info && \
 	genhtml -o coverage coverage.info && cp coverage.info /tmp
 
 #RUN cd /opt/sources && mkdir build && \
