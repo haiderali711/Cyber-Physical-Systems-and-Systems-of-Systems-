@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Which Docker image shall be used on the GitLab runner?
-image: ubuntu:18.04
+image: docker:latest
 
 # Details about how to connect to the Docker service to run this build.
 variables:
@@ -60,6 +60,10 @@ Coverage:
   tags:
     - docker-build
   stage: test
+  before_script:
+    - docker pull ubuntu:18.04
+    - docker run --rm -ti -v $PWD:/opt/sources ubuntu:18.04 /bin/bash
+    - cd /opt/sources
   script:
     - ls
     - g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp PrimeChecker.cpp -o mybinary
