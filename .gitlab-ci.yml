@@ -63,7 +63,7 @@ pages:
     - ls
   artifacts:
     paths:
-      - public/
+      - public
     expire_in: 30 days
-  #only:
-  #  - master
+  only:
+    - master
