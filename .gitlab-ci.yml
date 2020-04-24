@@ -66,6 +66,6 @@ coverage:
     - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
   script:
     - ls
-    - g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp -o mybinary
+    - g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp PrimeChecker.cpp -o mybinary
     - ./mybinary
     - ls
