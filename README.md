@@ -2,6 +2,8 @@
 
 [![pipeline status](https://git.chalmers.se/courses/dit638/students/group_01/badges/master/pipeline.svg)](https://git.chalmers.se/courses/dit638/students/group_01/-/commits/master)
 
+[![coverage report](https://git.chalmers.se/courses/dit638/students/group_01/badges/master/coverage.svg)](https://git.chalmers.se/courses/dit638/students/group_01/-/commits/master)
+
 *   [Steps to clone Repository](#steps-to-clone-repository)
 *   [Building the Program](#building-the-program)
 *   [Addition of new Features](#addition-of-new-features)
