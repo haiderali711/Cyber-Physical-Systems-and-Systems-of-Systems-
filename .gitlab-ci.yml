@@ -59,7 +59,7 @@ release:
 
 Coverage:
   tags:
-    - shell-executor
+    - docker-build
   stage: test
   before_script:
     - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
