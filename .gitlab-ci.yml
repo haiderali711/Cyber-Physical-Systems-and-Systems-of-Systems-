@@ -58,7 +58,7 @@ release:
 
 Coverage:
   tags:
-    - shell
+    - shell-executor 
   stage: test
   script:
     - ls
