@@ -58,7 +58,6 @@ release:
 # This is the part for the Covarege
 
 Coverage:
-  image: ubuntu:18.04
   tags:
     - docker-build
   stage: test
