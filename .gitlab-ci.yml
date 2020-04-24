@@ -58,8 +58,9 @@ release:
 # This is the part for the Covarege
 
 Coverage:
+  image: ubuntu:18.04
   tags:
-    - docker-build
+    - shell
   stage: test
   before_script:
     - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
@@ -70,4 +71,7 @@ Coverage:
     - ls
     - gcov helloworld.cpp
     - lcov --directory . --capture --output-file coverage.info
-    - lcov --list coverage.info
+    - genhtml -o coverage coverage.info
+  artifacts:
+    paths:
+      - coverage/
