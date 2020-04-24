@@ -61,16 +61,5 @@ Coverage:
   tags:
     - docker-build
   stage: test
-  before_script:
-    - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
   script:
-    - ls
-    - g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp PrimeChecker.cpp -o mybinary
-    - ./mybinary
-    - ls
-    - gcov helloworld.cpp
-    - lcov --directory . --capture --output-file coverage.info
-    - genhtml -o coverage coverage.info
-  artifacts:
-    paths:
-      - coverage/
+    - docker build -f Dockerfile1 .
