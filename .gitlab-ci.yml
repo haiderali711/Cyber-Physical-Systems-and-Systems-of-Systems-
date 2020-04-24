@@ -56,7 +56,11 @@ pages:
   dependencies:
     - build-and-test
   script:
+    - ls
     - mv coverage/ public/
+    - ls
+    - cd public/
+    - ls
   artifacts:
     paths:
       - public
