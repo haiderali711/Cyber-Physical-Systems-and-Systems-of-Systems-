@@ -22,7 +22,7 @@ variables:
   DOCKER_TLS_CERTDIR: ""
 
 services:
-  - name: docker:dind
+  - name: docker:18-dind
 
 stages:
   - build
