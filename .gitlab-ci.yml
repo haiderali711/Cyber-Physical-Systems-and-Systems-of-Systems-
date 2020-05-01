@@ -82,7 +82,7 @@ Coverage:
 pages:
   stage: deploy
   dependencies:
-    - build-and-test
+    - Coverage
   script:
     - ls
     - mv coverage/ public/
