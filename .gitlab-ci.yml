@@ -81,8 +81,6 @@ coverage-job:
 
 pages:
   stage: deploy
-  dependencies:
-    - coverage-job
   script:
     - ls
     - mv coverage/ public/
