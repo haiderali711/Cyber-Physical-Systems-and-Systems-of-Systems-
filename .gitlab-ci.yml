@@ -58,7 +58,7 @@ release:
 
 # This is the part for the Covarege
 
-Coverage:
+coverage-job:
   image: ubuntu:18.04
   before_script:
   - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
@@ -82,7 +82,7 @@ Coverage:
 pages:
   stage: deploy
   dependencies:
-    - Coverage
+    - coverage-job
   script:
     - ls
     - mv coverage/ public/
