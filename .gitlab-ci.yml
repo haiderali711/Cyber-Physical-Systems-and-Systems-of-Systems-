@@ -80,6 +80,8 @@ coverage-job:
 
 pages:
   stage: test
+  tags:
+    - docker-build
   script:
     - ls
     - mv coverage/ public/
