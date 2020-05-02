@@ -69,32 +69,15 @@ coverage-job:
   script:
     - ls
     - g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp PrimeChecker.cpp -o mybinary
-    - ./mybinary
+    - ./mybinary 45
     - ls
     - gcov helloworld.cpp
     - lcov --directory . --capture --output-file coverage.info
-    - genhtml -o coverage coverage.info
+    #- genhtml -o coverage coverage.info
+    - lcov --list coverage.info
   artifacts:
     paths:
       - coverage/
-
-pages:
-  stage: test
-  tags:
-    - docker-build
-  script:
-    - ls
-    - mv coverage/ public/
-    - ls
-    - cd public/
-    - ls
-  artifacts:
-    paths:
-      - public
-    expire_in: 30 days
-
-
-
 
 
 #  tags:
