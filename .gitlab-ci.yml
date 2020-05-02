@@ -79,7 +79,7 @@ coverage-job:
       - coverage/
 
 pages:
-  stage: deploy
+  stage: test
   script:
     - ls
     - mv coverage/ public/
