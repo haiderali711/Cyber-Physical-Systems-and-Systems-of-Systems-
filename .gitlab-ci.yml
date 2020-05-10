@@ -57,26 +57,24 @@ release:
 
 # This is the part for the Covarege
 
-coverage-job:
-  image: ubuntu:18.04
-  before_script:
-  - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
-  tags:
-    - docker-build
-  stage: test
-  script:
-    - ls
-    - g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp PrimeChecker.cpp -o mybinary
-    - ./mybinary 45
-    - ls
-    - ./mybinary 13
-    - ls
-    - gcov helloworld.cpp
-    - lcov --directory . --capture --output-file coverage.info
-    - gcovr -r .
-    - lcov --list coverage.info
-    - genhtml -o coverage coverage.info
+#coverage-job:
+#  image: ubuntu:18.04
+#  before_script:
+#  - apt-get -qq update && apt-get -qq install -y make autoconf gcc g++ gcovr ggcov lcov
+#  tags:
+#    - docker-build
+#  stage: test
+#  script:
+#    - cd src/
+#    - g++ -Wall --coverage -fprofile-arcs -ftest-coverage template-opencv.cpp -o mybinary
+#    - ./mybinary
+#    - ls
+#    - gcov template-opencv.cpp
+#    - lcov --directory . --capture --output-file coverage.info
+#    - gcovr -r .
+#    - lcov --list coverage.info
+#    - genhtml -o coverage coverage.info
 
-  artifacts:
-    paths:
-      - coverage/
+#  artifacts:
+#    paths:
+#      - coverage/
