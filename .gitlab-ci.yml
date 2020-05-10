@@ -43,6 +43,7 @@ build-and-test:
   script:
     - docker build -f Dockerfile .
 
+
 # This section describes what shall be done to deploy artefacts from the project.
 release:
   tags:
