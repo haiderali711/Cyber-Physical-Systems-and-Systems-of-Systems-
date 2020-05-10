@@ -28,7 +28,16 @@
  
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
+	/*double lowest {0.0000};
+	double highest {0.0000};
+	int lowH = 20;       // Set Hue
+ 	int highH = 30;
 
+ 	int lowS = 0;       // Set Saturation
+ 	int highS = 255;
+
+ 	int lowV = 20;       // Set Value
+ 	int highV = 225; */
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
     if ( (0 == commandlineArguments.count("cid")) ||
@@ -74,35 +83,9 @@ int32_t main(int32_t argc, char **argv) {
             //time_t now;
             //int seconds, microseconds;
            
-            cv::Mat workingArea;
-            cv::Mat leftImg;
-            cv::Mat rightImg;
-
-            //----------------Object detection
-            int lowHB = 108;       // Set Hue
-            int highHB = 128;
-
-            int lowSB = 90;       // Set Saturation
-            int highSB = 255;
-
-            int lowVB = 10;       // Set Value
-            int highVB = 225; 
-            /*
-            int lowHY = 20;       // Set Hue
-            int highY = 30;
-
-            int lowSY = 0;       // Set Saturation
-            int highSY = 255;
-
-            int lowVY = 20;       // Set Value
-            int highVY = 225; 
-            */
-            cv::Mat hsvImg;    // HSV Image
-            cv::Mat threshImg;   // Thresh Image
-
-            //std::vector v3fCircles;  // 3 element vector of floats, this will be the pass by reference output of HoughCircles()
-            
-
+		    cv::Mat workingArea;
+		    cv::Mat leftImg;
+		    cv::Mat rightImg;
             // Endless loop; end the program by pressing Ctrl-C.
             while (od4.isRunning()) {
                 // OpenCV data structure to hold an image.
@@ -124,36 +107,60 @@ int32_t main(int32_t argc, char **argv) {
  
                 // TODO: Do something with the frame.
 
-                //cropping the main part of the image from the Original Frame
-                img(cv::Rect(0,250,640,100)).copyTo(workingArea);
-                //draw the red triangles for parts to discard in the main image
-                cv::rectangle(img, cv::Point(2, 2), cv::Point(638, 248), cv::Scalar(0,0,255),4);
-                cv::rectangle(img, cv::Point(2, 362), cv::Point(638, 478), cv::Scalar(0,0,255),4);
+				//cropping the main part of the image from the Original Frame
+ 			    img(cv::Rect(0,250,640,100)).copyTo(workingArea);
+ 			    //draw the red triangles for parts to discard in the main image
+ 			    cv::rectangle(img, cv::Point(2, 2), cv::Point(638, 248), cv::Scalar(0,0,255),4);
+ 			    cv::rectangle(img, cv::Point(2, 362), cv::Point(638, 478), cv::Scalar(0,0,255),4);
 
-                //draw the green rectangles for the working areas
-                cv::rectangle(img, cv::Point(2, 252), cv::Point(318, 358), cv::Scalar(0,255,0), 4);
-                cv::rectangle(img, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
+ 			    //draw the green rectangles for the working areas
+				cv::rectangle(img, cv::Point(2, 252), cv::Point(318, 358), cv::Scalar(0,255,0), 4);
+ 			    cv::rectangle(img, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
 
-                //cropping the left and right sides from the workingArea
-                img(cv::Rect(0,250,320,110)).copyTo(leftImg);
-                img(cv::Rect(320,250,320,110)).copyTo(rightImg);
-
-
-                //-------------------------------------------Object detection
+				//cropping the left and right sides from the workingArea
+				img(cv::Rect(0,250,320,110)).copyTo(leftImg);
+				img(cv::Rect(320,250,320,110)).copyTo(rightImg);
 
 
 
-                cv::cvtColor(rightImg, hsvImg, CV_BGR2HSV);      // Convert Original Image to HSV Thresh Image
 
-                cv::inRange(hsvImg, cv::Scalar(lowHB, lowSB, lowVB), cv::Scalar(highHB, highSB, highVB), threshImg);
+                // Example: Draw a red rectangle and display image.
+               /*
+                std::string overlay;
+ 
+                time(&now);
+                char buf[sizeof "2012-10-08T07:12:03Z"];
+                strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
+                //std::cout << buf;
+ 
+                overlay += "Now: ";
+                overlay += buf;
+                overlay += "; ts:";
+                overlay += std::to_string(seconds);
+                overlay += std::to_string(microseconds);
+                overlay += "; Shab Pompeiano";
+ 
+                cv::putText(img, overlay, cv::Point(20, 20), 1, 1,  cv::Scalar(255,255,255));*/
 
-                cv::GaussianBlur(threshImg, threshImg, cv::Size(3, 3), 0);   //Blur Effect
-                cv::dilate(threshImg, threshImg, 0);        // Dilate Filter Effect
-                cv::erode(threshImg, threshImg, 0);         // Erode Filter Effect
-               
+
+               /*
+                // If you want to access the latest received ground steering, don't forget to lock the mutex:
+                {
+                    std::lock_guard<std::mutex> lck(gsrMutex);
+                    std::cout << "main: NOW = " << gsr.groundSteering() << std::endl;
+			
+        			if (gsr.groundSteering()>highest){
+        				highest=gsr.groundSteering();
+        			}
+        			if (gsr.groundSteering()<lowest){
+        				lowest=gsr.groundSteering();
+        			}
+                    std::cout << "Highest = " << highest << " ||   Lowest : "<<lowest<< std::endl<< std::endl;
+                }
+                */
                 // Display image on your screen.
                 if (VERBOSE) {
-                    cv::imshow(sharedMemory->name().c_str(), rightImg);
+                    cv::imshow(sharedMemory->name().c_str(), img);
                     cv::waitKey(1);
                 }
             }

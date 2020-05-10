@@ -65,13 +65,11 @@ coverage-job:
     - docker-build
   stage: test
   script:
+    - cd src/
+    - g++ -Wall --coverage -fprofile-arcs -ftest-coverage template-opencv.cpp -o mybinary
+    - ./mybinary
     - ls
-    - g++ -Wall --coverage -fprofile-arcs -ftest-coverage helloworld.cpp PrimeChecker.cpp -o mybinary
-    - ./mybinary 45
-    - ls
-    - ./mybinary 13
-    - ls
-    - gcov helloworld.cpp
+    - gcov template-opencv.cpp
     - lcov --directory . --capture --output-file coverage.info
     - gcovr -r .
     - lcov --list coverage.info
