@@ -68,9 +68,4 @@ _deps
 # Executables
 *.exe
 *.out
-<<<<<<< HEAD
 *.app
-=======
-*.app
-
->>>>>>> blue_cones_recognition

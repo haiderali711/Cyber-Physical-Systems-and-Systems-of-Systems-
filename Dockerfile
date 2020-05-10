@@ -25,11 +25,7 @@ RUN apt-get update -y && \
     apt-get dist-upgrade -y
 
 # Install the development libraries for OpenCV
-<<<<<<< HEAD
 RUN apt-get install -y --no-install-recommends --fix-missing\
-=======
-RUN apt-get install -y --no-install-recommends \
->>>>>>> blue_cones_recognition
         ca-certificates \
         cmake \
         build-essential \
@@ -57,17 +53,9 @@ RUN apt-get update -y && \
 RUN apt-get install -y --no-install-recommends \
         libopencv-core3.2 \
         libopencv-highgui3.2 \
-<<<<<<< HEAD
         libopencv-imgproc3.2
-=======
-        libopencv-imgproc3.2 
->>>>>>> blue_cones_recognition
 
 WORKDIR /usr/bin
 COPY --from=builder /tmp/bin/template-opencv .
 # This is the entrypoint when starting the Docker container; hence, this Docker image is automatically starting our software on its creation
-<<<<<<< HEAD
 ENTRYPOINT ["/usr/bin/template-opencv"]
-=======
-ENTRYPOINT ["/usr/bin/template-opencv"]
->>>>>>> blue_cones_recognition

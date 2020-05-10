@@ -43,7 +43,6 @@ build-and-test:
   script:
     - docker build -f Dockerfile .
 
-
 # This section describes what shall be done to deploy artefacts from the project.
 release:
   tags:
@@ -53,7 +52,6 @@ release:
     - if: $CI_COMMIT_TAG != null && $CI_COMMIT_TAG =~ /^v\d[.]\d[.]\d$/
   script:
     - docker build -f Dockerfile -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" .
-<<<<<<< HEAD
     - docker push "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG"
 
 
@@ -80,6 +78,3 @@ release:
 #  artifacts:
 #    paths:
 #      - coverage/
-=======
-    - docker push "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG"
->>>>>>> blue_cones_recognition
