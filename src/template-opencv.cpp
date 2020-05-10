@@ -14,21 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+<<<<<<< HEAD
  
 // Include the single-file, header-only middleware libcluon to create high-performance microservices
 #include "cluon-complete.hpp"
 // Include the OpenDLV Standard Message Set that contains messages that are usually exchanged for automotive or robotic applications
 #include "opendlv-standard-message-set.hpp"
  
+=======
+
+// Include the single-file, header-only middleware libcluon to create high-performance microservices
+#include "cluon-complete.hpp"
+// Include the OpenDLV Standard Message Set that contains messages that are usually exchanged for automotive or robotic applications 
+#include "opendlv-standard-message-set.hpp"
+
+>>>>>>> blue_cones_recognition
 // Include the GUI and image processing header files from OpenCV
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <ctime>
+<<<<<<< HEAD
  
  
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
 
+=======
+
+int32_t main(int32_t argc, char **argv) {
+    int32_t retCode{1};
+>>>>>>> blue_cones_recognition
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
     if ( (0 == commandlineArguments.count("cid")) ||
@@ -49,17 +64,30 @@ int32_t main(int32_t argc, char **argv) {
         const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
         const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
+<<<<<<< HEAD
  
  
+=======
+
+
+>>>>>>> blue_cones_recognition
         // Attach to the shared memory.
         std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
         if (sharedMemory && sharedMemory->valid()) {
             std::clog << argv[0] << ": Attached to shared memory '" << sharedMemory->name() << " (" << sharedMemory->size() << " bytes)." << std::endl;
+<<<<<<< HEAD
  
             // Interface to a running OpenDaVINCI session where network messages are exchanged.
             // The instance od4 allows you to send and receive messages.
             cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
  
+=======
+
+            // Interface to a running OpenDaVINCI session where network messages are exchanged.
+            // The instance od4 allows you to send and receive messages.
+            cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
+
+>>>>>>> blue_cones_recognition
             opendlv::proxy::GroundSteeringRequest gsr;
             std::mutex gsrMutex;
             auto onGroundSteeringRequest = [&gsr, &gsrMutex](cluon::data::Envelope &&env){
@@ -67,6 +95,7 @@ int32_t main(int32_t argc, char **argv) {
                 // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
                 std::lock_guard<std::mutex> lck(gsrMutex);
                 gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
+<<<<<<< HEAD
                 //std::cout << "lambda: groundSteering = " << gsr.groundSteering() << std::endl;
             };
  
@@ -103,19 +132,36 @@ int32_t main(int32_t argc, char **argv) {
             //std::vector v3fCircles;  // 3 element vector of floats, this will be the pass by reference output of HoughCircles()
             
 
+=======
+                std::cout << "lambda: groundSteering = " << gsr.groundSteering() << std::endl;
+            };
+
+            od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
+            time_t now;
+            int seconds, microseconds;
+            
+>>>>>>> blue_cones_recognition
             // Endless loop; end the program by pressing Ctrl-C.
             while (od4.isRunning()) {
                 // OpenCV data structure to hold an image.
                 cv::Mat img;
+<<<<<<< HEAD
                 // Wait for a notification of a new frame.
                 sharedMemory->wait();
  
+=======
+
+                // Wait for a notification of a new frame.
+                sharedMemory->wait();
+
+>>>>>>> blue_cones_recognition
                 // Lock the shared memory.
                 sharedMemory->lock();
                 {
                     // Copy the pixels from the shared memory into our own data structure.
                     cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
                     img = wrapped.clone();
+<<<<<<< HEAD
                     //seconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).seconds();
                     //microseconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).microseconds();
                 }
@@ -154,6 +200,85 @@ int32_t main(int32_t argc, char **argv) {
                 // Display image on your screen.
                 if (VERBOSE) {
                     cv::imshow(sharedMemory->name().c_str(), rightImg);
+=======
+
+                    seconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).seconds();
+                    microseconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).microseconds();
+                }
+                // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
+                sharedMemory->unlock();
+
+                // TODO: Do something with the frame.
+                // Example: Draw a red rectangle and display image.
+                
+                std::string overlay;
+
+                time(&now);
+                char buf[sizeof "2012-10-08T07:12:03Z"];
+                strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
+                std::cout << buf;
+
+                overlay += "Now: ";
+                overlay += buf;
+                overlay += "; ts:";
+                overlay += std::to_string(seconds);
+                overlay += std::to_string(microseconds);
+                overlay += "; Shab Pompeiano";
+
+                cv::putText(img, overlay, cv::Point(20, 20), 1, 1,  cv::Scalar(255,255,255));
+                cv::rectangle(img, cv::Point(50, 50), cv::Point(100, 100), cv::Scalar(0,0,255));
+
+
+                // Apply gamma color correction by factor 0.4 
+                double gamma_ = 0.4;
+                cv::Mat lookUpTable(1, 256, CV_8U);
+                uchar* p = lookUpTable.ptr();
+                for( int i = 0; i < 256; ++i)
+                    p[i] = cv::saturate_cast<uchar>(pow(i / 255.0, gamma_) * 255.0);
+                cv::Mat gamma_corrected = img.clone();
+                cv::LUT(img, lookUpTable, gamma_corrected);
+
+                //set HSV values
+                int lowH = 105;
+                int highH = 140;
+                int lowS = 42;
+                int highS = 107;
+                int lowV = 107;
+                int highV = 163;
+
+                cv::Mat hsvImg;    // HSV Image
+                cv::Mat blue_cones;   // Thresh Image
+
+                // convert the gamma corrected image to HSV
+                cv::cvtColor(gamma_corrected, hsvImg, CV_BGR2HSV);
+                // Apply HSV filter
+                cv::inRange(hsvImg, cv::Scalar(lowH, lowS, lowV), cv::Scalar(highH, highS, highV), blue_cones);
+
+                // Erosion
+                cv::Mat erosion_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+                cv::erode(blue_cones, blue_cones, erosion_kernel);
+
+                // Dilation
+                cv::Mat dilation_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+                cv::dilate(blue_cones, blue_cones, dilation_kernel);
+                
+                /*
+                cv::GaussianBlur(blue_cones, blue_cones, cv::Size(3, 3), 0);   //Blur Effect
+                */
+
+                cv::namedWindow("blue_cones", CV_WINDOW_AUTOSIZE); 
+                cv::imshow("blue_cones", blue_cones);
+
+                // If you want to access the latest received ground steering, don't forget to lock the mutex:
+                {
+                    std::lock_guard<std::mutex> lck(gsrMutex);
+                    std::cout << "main: groundSteering = " << gsr.groundSteering() << std::endl;
+                }
+
+                // Display image on your screen.
+                if (VERBOSE) {
+                    cv::imshow(sharedMemory->name().c_str(), img);
+>>>>>>> blue_cones_recognition
                     cv::waitKey(1);
                 }
             }
@@ -162,3 +287,7 @@ int32_t main(int32_t argc, char **argv) {
     }
     return retCode;
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> blue_cones_recognition
