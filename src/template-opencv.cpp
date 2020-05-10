@@ -71,14 +71,12 @@ int32_t main(int32_t argc, char **argv) {
             };
  
             od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
-            //time_t now;
-            //int seconds, microseconds;
            
             cv::Mat workingArea;
             cv::Mat leftImg;
             cv::Mat rightImg;
 
-            //----------------Object detection
+            /*----------------Object detection
             int lowHB = 108;       // Set Hue
             int highHB = 128;
 
@@ -98,10 +96,8 @@ int32_t main(int32_t argc, char **argv) {
             int highVY = 225; 
             */
             cv::Mat hsvImg;    // HSV Image
-            cv::Mat threshImg;   // Thresh Image
 
             //std::vector v3fCircles;  // 3 element vector of floats, this will be the pass by reference output of HoughCircles()
-            
 
             // Endless loop; end the program by pressing Ctrl-C.
             while (od4.isRunning()) {
@@ -116,8 +112,6 @@ int32_t main(int32_t argc, char **argv) {
                     // Copy the pixels from the shared memory into our own data structure.
                     cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
                     img = wrapped.clone();
-                    //seconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).seconds();
-                    //microseconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).microseconds();
                 }
                 // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
                 sharedMemory->unlock();
@@ -138,22 +132,49 @@ int32_t main(int32_t argc, char **argv) {
                 img(cv::Rect(0,250,320,110)).copyTo(leftImg);
                 img(cv::Rect(320,250,320,110)).copyTo(rightImg);
 
+				// Apply gamma color correction by factor 0.4 
+                double gamma_ = 0.4;
+                cv::Mat lookUpTable(1, 256, CV_8U);
+                uchar* p = lookUpTable.ptr();
+                for( int i = 0; i < 256; ++i)
+                    p[i] = cv::saturate_cast<uchar>(pow(i / 255.0, gamma_) * 255.0);
+                cv::Mat gamma_corrected = img.clone();
+                cv::LUT(img, lookUpTable, gamma_corrected);
 
-                //-------------------------------------------Object detection
+                //set HSV values
+                int lowH = 105;
+                int highH = 140;
+                int lowS = 42;
+                int highS = 107;
+                int lowV = 107;
+                int highV = 163;
 
+                cv::Mat blue_cones;   // Thresh Image
 
+                // convert the gamma corrected image to HSV
+                cv::cvtColor(gamma_corrected, hsvImg, CV_BGR2HSV);
+                // Apply HSV filter
+                cv::inRange(hsvImg, cv::Scalar(lowH, lowS, lowV), cv::Scalar(highH, highS, highV), blue_cones);
 
-                cv::cvtColor(rightImg, hsvImg, CV_BGR2HSV);      // Convert Original Image to HSV Thresh Image
+                // Erosion
+                cv::Mat erosion_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+                cv::erode(blue_cones, blue_cones, erosion_kernel);
 
-                cv::inRange(hsvImg, cv::Scalar(lowHB, lowSB, lowVB), cv::Scalar(highHB, highSB, highVB), threshImg);
+                // Dilation
+                cv::Mat dilation_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+                cv::dilate(blue_cones, blue_cones, dilation_kernel);
+                
+                /*
+                cv::GaussianBlur(blue_cones, blue_cones, cv::Size(3, 3), 0);   //Blur Effect
+                */
 
-                cv::GaussianBlur(threshImg, threshImg, cv::Size(3, 3), 0);   //Blur Effect
-                cv::dilate(threshImg, threshImg, 0);        // Dilate Filter Effect
-                cv::erode(threshImg, threshImg, 0);         // Erode Filter Effect
-               
+			    cv::namedWindow("blue_cones", CV_WINDOW_AUTOSIZE); 
+				
+                cv::imshow("blue_cones", blue_cones);
+
                 // Display image on your screen.
                 if (VERBOSE) {
-                    cv::imshow(sharedMemory->name().c_str(), rightImg);
+                    cv::imshow(sharedMemory->name().c_str(), img);
                     cv::waitKey(1);
                 }
             }
