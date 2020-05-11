@@ -14,67 +14,91 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 // Include the single-file, header-only middleware libcluon to create high-performance microservices
 #include "cluon-complete.hpp"
 // Include the OpenDLV Standard Message Set that contains messages that are usually exchanged for automotive or robotic applications
 #include "opendlv-standard-message-set.hpp"
- 
+
 // Include the GUI and image processing header files from OpenCV
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <ctime>
- 
- 
+
+
+double HAS_CONES_THRESHHOLD = 0.2;
+
+bool imageContainsCones (cv::Mat image) {
+    int amount = 0;
+
+    for (int x = 240;x < image.rows; x++)//To loop through all the pixels
+    {
+        for (int y = 0; y < image.cols; y++)
+        {
+            if(image.at<uchar>(x,y) == 255){
+                amount++;
+            }
+        }
+    }
+    int n_pixels = (image.rows - 240)*image.cols;
+    double white_percentage = (double)(amount * 100) / n_pixels;
+    std::cout << std::endl << "Amount: " << amount << "/" << n_pixels << "    " << white_percentage << "%" << std::endl;
+    
+    if (white_percentage > HAS_CONES_THRESHHOLD) {
+        return true;
+    }
+    return false;
+}
+
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
 
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
     if ( (0 == commandlineArguments.count("cid")) ||
-         (0 == commandlineArguments.count("name")) ||
-         (0 == commandlineArguments.count("width")) ||
-         (0 == commandlineArguments.count("height")) ) {
+       (0 == commandlineArguments.count("name")) ||
+       (0 == commandlineArguments.count("width")) ||
+       (0 == commandlineArguments.count("height")) ) {
         std::cerr << argv[0] << " attaches to a shared memory area containing an ARGB image." << std::endl;
-        std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> --name=<name of shared memory area> [--verbose]" << std::endl;
-        std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
-        std::cerr << "         --name:   name of the shared memory area to attach" << std::endl;
-        std::cerr << "         --width:  width of the frame" << std::endl;
-        std::cerr << "         --height: height of the frame" << std::endl;
-        std::cerr << "Example: " << argv[0] << " --cid=253 --name=img --width=640 --height=480 --verbose" << std::endl;
-    }
-    else {
+    std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> --name=<name of shared memory area> [--verbose]" << std::endl;
+    std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
+    std::cerr << "         --name:   name of the shared memory area to attach" << std::endl;
+    std::cerr << "         --width:  width of the frame" << std::endl;
+    std::cerr << "         --height: height of the frame" << std::endl;
+    std::cerr << "Example: " << argv[0] << " --cid=253 --name=img --width=640 --height=480 --verbose" << std::endl;
+}
+else {
         // Extract the values from the command line parameters
-        const std::string NAME{commandlineArguments["name"]};
-        const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
-        const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
-        const bool VERBOSE{commandlineArguments.count("verbose") != 0};
- 
- 
+    const std::string NAME{commandlineArguments["name"]};
+    const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
+    const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
+    const bool VERBOSE{commandlineArguments.count("verbose") != 0};
+
+
         // Attach to the shared memory.
-        std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
-        if (sharedMemory && sharedMemory->valid()) {
-            std::clog << argv[0] << ": Attached to shared memory '" << sharedMemory->name() << " (" << sharedMemory->size() << " bytes)." << std::endl;
- 
+    std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
+    if (sharedMemory && sharedMemory->valid()) {
+        std::clog << argv[0] << ": Attached to shared memory '" << sharedMemory->name() << " (" << sharedMemory->size() << " bytes)." << std::endl;
+
             // Interface to a running OpenDaVINCI session where network messages are exchanged.
             // The instance od4 allows you to send and receive messages.
-            cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
- 
-            opendlv::proxy::GroundSteeringRequest gsr;
-            std::mutex gsrMutex;
-            auto onGroundSteeringRequest = [&gsr, &gsrMutex](cluon::data::Envelope &&env){
+        cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
+
+        opendlv::proxy::GroundSteeringRequest gsr;
+        std::mutex gsrMutex;
+        auto onGroundSteeringRequest = [&gsr, &gsrMutex](cluon::data::Envelope &&env){
                 // The envelope data structure provide further details, such as sampleTimePoint as shown in this test case:
                 // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
-                std::lock_guard<std::mutex> lck(gsrMutex);
-                gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
+            std::lock_guard<std::mutex> lck(gsrMutex);
+            gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
                 //std::cout << "lambda: groundSteering = " << gsr.groundSteering() << std::endl;
-            };
- 
-            od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
-           
-            cv::Mat workingArea;
-            cv::Mat leftImg;
-            cv::Mat rightImg;
+        };
+
+        od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
+
+        cv::Mat workingArea;
+        cv::Mat leftImg;
+        cv::Mat rightImg;
 
             /*----------------Object detection
             int lowHB = 108;       // Set Hue
@@ -105,7 +129,7 @@ int32_t main(int32_t argc, char **argv) {
                 cv::Mat img;
                 // Wait for a notification of a new frame.
                 sharedMemory->wait();
- 
+
                 // Lock the shared memory.
                 sharedMemory->lock();
                 {
@@ -115,7 +139,7 @@ int32_t main(int32_t argc, char **argv) {
                 }
                 // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
                 sharedMemory->unlock();
- 
+
                 // TODO: Do something with the frame.
 
                 //cropping the main part of the image from the Original Frame
@@ -141,7 +165,7 @@ int32_t main(int32_t argc, char **argv) {
                 cv::Mat gamma_corrected = img.clone();
                 cv::LUT(img, lookUpTable, gamma_corrected);
 
-                //set HSV values
+                //set HSV values for blue cones
                 int lowH = 105;
                 int highH = 140;
                 int lowS = 42;
@@ -179,12 +203,14 @@ int32_t main(int32_t argc, char **argv) {
                 cv::dilate(yellow_cones, yellow_cones, dilation_kernel);
 
                 
+                std::cout<<"return: "<<imageContainsCones (blue_cones)<<std::endl;
+                
                 /*
                 cv::GaussianBlur(blue_cones, blue_cones, cv::Size(3, 3), 0);   //Blur Effect
                 */
-               	cv::Mat cones_image;
-               	cv::addWeighted(blue_cones, 1.0, yellow_cones, 1.0, 0.0, cones_image);
-               	cv::GaussianBlur(cones_image, cones_image, cv::Size(3, 3), 0); 
+                cv::Mat cones_image;
+                cv::addWeighted(blue_cones, 1.0, yellow_cones, 1.0, 0.0, cones_image);
+                cv::GaussianBlur(cones_image, cones_image, cv::Size(3, 3), 0); 
 
                 cv::namedWindow("cones", CV_WINDOW_AUTOSIZE);
 
