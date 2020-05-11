@@ -75,6 +75,9 @@ int32_t main(int32_t argc, char **argv) {
             cv::Mat workingArea;
             cv::Mat leftImg;
             cv::Mat rightImg;
+            cv::Mat leftArray [5];
+            cv::Mat rightArray [5];
+
 
             /*----------------Object detection
             int lowHB = 108;       // Set Hue
@@ -85,7 +88,7 @@ int32_t main(int32_t argc, char **argv) {
 
             int lowVB = 10;       // Set Value
             int highVB = 225; 
-            /*
+            
             int lowHY = 20;       // Set Hue
             int highY = 30;
 
@@ -118,8 +121,6 @@ int32_t main(int32_t argc, char **argv) {
  
                 // TODO: Do something with the frame.
 
-                //cropping the main part of the image from the Original Frame
-                img(cv::Rect(0,250,640,100)).copyTo(workingArea);
                 //draw the red triangles for parts to discard in the main image
                 cv::rectangle(img, cv::Point(2, 2), cv::Point(638, 248), cv::Scalar(0,0,255),4);
                 cv::rectangle(img, cv::Point(2, 362), cv::Point(638, 478), cv::Scalar(0,0,255),4);
@@ -127,10 +128,6 @@ int32_t main(int32_t argc, char **argv) {
                 //draw the green rectangles for the working areas
                 cv::rectangle(img, cv::Point(2, 252), cv::Point(318, 358), cv::Scalar(0,255,0), 4);
                 cv::rectangle(img, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
-
-                //cropping the left and right sides from the workingArea
-                img(cv::Rect(0,250,320,110)).copyTo(leftImg);
-                img(cv::Rect(320,250,320,110)).copyTo(rightImg);
 
 				// Apply gamma color correction by factor 0.4 
                 double gamma_ = 0.4;
@@ -186,12 +183,48 @@ int32_t main(int32_t argc, char **argv) {
                	cv::addWeighted(blue_cones, 1.0, yellow_cones, 1.0, 0.0, cones_image);
                	cv::GaussianBlur(cones_image, cones_image, cv::Size(3, 3), 0); 
 
-                cv::namedWindow("cones", CV_WINDOW_AUTOSIZE);
+				/*//cropping the main part of the image from the Original Frame*/
+                cones_image(cv::Rect(0,250,640,100)).copyTo(workingArea);
 
+                //draw the red triangles for parts to discard in the main image
+                cv::rectangle(cones_image, cv::Point(2, 2), cv::Point(638, 248), cv::Scalar(0,0,255),4);
+                cv::rectangle(cones_image, cv::Point(2, 362), cv::Point(638, 478), cv::Scalar(0,0,255),4);
+
+                //draw the green rectangles for the working areas
+                cv::rectangle(cones_image, cv::Point(2, 252), cv::Point(318, 358), cv::Scalar(0,255,0), 4);
+                cv::rectangle(cones_image, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
+
+                //cropping the left and right sides from the workingArea
+                cones_image(cv::Rect(0,250,320,110)).copyTo(leftImg);
+                cones_image(cv::Rect(320,250,320,110)).copyTo(rightImg);
+
+                int maxWidth = 320;
+                int counter = 0;
+                leftImg(cv::Rect(0,0,maxWidth,110)).copyTo(leftArray[counter]);
+
+                /*for (int i = 5; i > 0; i--)
+                {
+                	leftImg(cv::Rect(maxWidth-64,0,maxWidth,110)).copyTo(leftArray[counter]);
+                	maxWidth = maxWidth - 64;
+                	counter++;
+                }*/
+
+
+                cv::namedWindow("left1", CV_WINDOW_AUTOSIZE);
+                /*cv::namedWindow("left2", CV_WINDOW_AUTOSIZE);
+                cv::namedWindow("left3", CV_WINDOW_AUTOSIZE);
+                cv::namedWindow("left4", CV_WINDOW_AUTOSIZE);
+                cv::namedWindow("left5", CV_WINDOW_AUTOSIZE);
+				*/
                 // Display image on your screen.
                 if (VERBOSE) {
                     cv::imshow(sharedMemory->name().c_str(), img);
-                    cv::imshow("cones", cones_image);
+                    //cv::imshow("cones", leftImg);
+                    cv::imshow("left1", leftArray[0]);
+                    /*cv::imshow("left2", leftArray[1]);
+                    cv::imshow("left3", leftArray[2]);
+                    cv::imshow("left4", leftArray[3]);
+                    cv::imshow("left5", leftArray[4]);*/
                     cv::waitKey(1);
                 }
             }
