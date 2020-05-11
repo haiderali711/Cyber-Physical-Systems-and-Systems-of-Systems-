@@ -182,14 +182,16 @@ int32_t main(int32_t argc, char **argv) {
                 /*
                 cv::GaussianBlur(blue_cones, blue_cones, cv::Size(3, 3), 0);   //Blur Effect
                 */
+               	cv::Mat cones_image;
+               	cv::addWeighted(blue_cones, 1.0, yellow_cones, 1.0, 0.0, cones_image);
+               	cv::GaussianBlur(cones_image, cones_image, cv::Size(3, 3), 0); 
 
-			    cv::namedWindow("blue_cones", CV_WINDOW_AUTOSIZE); 
-				
-                cv::imshow("blue_cones", blue_cones);
+                cv::namedWindow("cones", CV_WINDOW_AUTOSIZE);
 
                 // Display image on your screen.
                 if (VERBOSE) {
                     cv::imshow(sharedMemory->name().c_str(), img);
+                    cv::imshow("cones", cones_image);
                     cv::waitKey(1);
                 }
             }
