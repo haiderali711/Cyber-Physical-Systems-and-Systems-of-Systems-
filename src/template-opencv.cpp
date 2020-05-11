@@ -29,14 +29,6 @@
 double HAS_CONES_THRESHHOLD = 0.2;
 int BLUE_IS_LEFT = 1;
 
-void decideSideCones (cv::Mat left, cv::Mat right) {
-    if (imageContainsCones(left) && imageContainsCones(right)) {
-        BLUE_IS_LEFT = 1;
-    } else {
-        BLUE_IS_LEFT = -1;
-    }
-}
-
 bool imageContainsCones (cv::Mat image) {
     int amount = 0;
 
@@ -56,6 +48,14 @@ bool imageContainsCones (cv::Mat image) {
         return true;
     }
     return false;
+}
+
+void decideSideCones (cv::Mat left, cv::Mat right) {
+    if (imageContainsCones(left) && imageContainsCones(right)) {
+        BLUE_IS_LEFT = 1;
+    } else {
+        BLUE_IS_LEFT = -1;
+    }
 }
 
 int32_t main(int32_t argc, char **argv) {
