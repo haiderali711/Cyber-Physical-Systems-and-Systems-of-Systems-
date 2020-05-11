@@ -149,20 +149,35 @@ int32_t main(int32_t argc, char **argv) {
                 int lowV = 107;
                 int highV = 163;
 
+                //set HSV values for yellow cones
+                int lowH2 = 20;
+                int highH2 = 30;
+                int lowS2 = 0;
+                int highS2 = 255;
+                int lowV2 = 20;
+                int highV2 = 255;
+
                 cv::Mat blue_cones;   // Thresh Image
+                cv::Mat yellow_cones; // Tresh Image
 
                 // convert the gamma corrected image to HSV
                 cv::cvtColor(gamma_corrected, hsvImg, CV_BGR2HSV);
                 // Apply HSV filter
                 cv::inRange(hsvImg, cv::Scalar(lowH, lowS, lowV), cv::Scalar(highH, highS, highV), blue_cones);
+                cv::inRange(hsvImg, cv::Scalar(lowH2, lowS2, lowV2), cv::Scalar(highH2, highS2, highV2), yellow_cones);
+
 
                 // Erosion
                 cv::Mat erosion_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
                 cv::erode(blue_cones, blue_cones, erosion_kernel);
+                cv::erode(yellow_cones, yellow_cones, erosion_kernel);
+
 
                 // Dilation
                 cv::Mat dilation_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
                 cv::dilate(blue_cones, blue_cones, dilation_kernel);
+                cv::dilate(yellow_cones, yellow_cones, dilation_kernel);
+
                 
                 /*
                 cv::GaussianBlur(blue_cones, blue_cones, cv::Size(3, 3), 0);   //Blur Effect
