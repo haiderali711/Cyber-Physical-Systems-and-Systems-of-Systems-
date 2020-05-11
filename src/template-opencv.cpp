@@ -25,6 +25,22 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <ctime>
  
+
+
+/********************************************
+****************CONE CHECKING FUNCTION*******
+********************************************/
+bool checkConePresence(cv::Mat imageSegment) {
+
+	//THE FUNCTIONS IMPLEMENTATION GOES HERE
+
+	//RETURNING TRUE just int case for the sake of having a testing prototype with default TRUE
+  	return true;
+} 
+
+
+
+//*****************MAIN**********************
  
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
@@ -72,33 +88,17 @@ int32_t main(int32_t argc, char **argv) {
  
             od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
            
-            cv::Mat workingArea;
-            cv::Mat leftImg;
-            cv::Mat rightImg;
-            cv::Mat leftArray [5];
-            cv::Mat rightArray [5];
 
 
-            /*----------------Object detection
-            int lowHB = 108;       // Set Hue
-            int highHB = 128;
+            //declaration of Variables related Image segmentation and color detection
 
-            int lowSB = 90;       // Set Saturation
-            int highSB = 255;
-
-            int lowVB = 10;       // Set Value
-            int highVB = 225; 
-            
-            int lowHY = 20;       // Set Hue
-            int highY = 30;
-
-            int lowSY = 0;       // Set Saturation
-            int highSY = 255;
-
-            int lowVY = 20;       // Set Value
-            int highVY = 225; 
-            */
-            cv::Mat hsvImg;    // HSV Image
+            cv::Mat leftImg;				//left segment with just cones 
+            cv::Mat rightImg;				//right segment with just cones
+            cv::Mat leftArray [5];			//smaller segments from leftImage
+            cv::Mat rightArray [5];			//smaller segments from rightImage
+            bool leftBooleans [5];			//boolean indication for cones presence
+            bool rightBooleans [5];			//boolean indication for cones presence
+            cv::Mat hsvImg;    				// HSV image for the original frame
 
             //std::vector v3fCircles;  // 3 element vector of floats, this will be the pass by reference output of HoughCircles()
 
@@ -129,6 +129,8 @@ int32_t main(int32_t argc, char **argv) {
                 cv::rectangle(img, cv::Point(2, 252), cv::Point(318, 358), cv::Scalar(0,255,0), 4);
                 cv::rectangle(img, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
 
+
+                //*********************Image Manipulation for Color detection ****************	
 				// Apply gamma color correction by factor 0.4 
                 double gamma_ = 0.4;
                 cv::Mat lookUpTable(1, 256, CV_8U);
@@ -176,55 +178,99 @@ int32_t main(int32_t argc, char **argv) {
                 cv::dilate(yellow_cones, yellow_cones, dilation_kernel);
 
                 
-                /*
+                
                 cv::GaussianBlur(blue_cones, blue_cones, cv::Size(3, 3), 0);   //Blur Effect
-                */
+                cv::GaussianBlur(yellow_cones, yellow_cones, cv::Size(3, 3), 0);   //Blur Effect
+                
+               	
+               	/*addWeighted is commented here below cz we dont wanna blend both 
+               	blue and yellow colors in one image
                	cv::Mat cones_image;
                	cv::addWeighted(blue_cones, 1.0, yellow_cones, 1.0, 0.0, cones_image);
-               	cv::GaussianBlur(cones_image, cones_image, cv::Size(3, 3), 0); 
+               	cv::GaussianBlur(cones_image, cones_image, cv::Size(3, 3), 0); */
+
+
+                /************************************
+                *************VERY IMPORTANT**********
+                *************Scenario Boolean********
+                ************************************/
+                int blueOnLeft = -1;				//the blue cone are Not on the left side -> default	
+                /************************************
+                ********THE METHOD FOR CHECKING******
+                ********THE INITIAL CONES SETTING ***
+                ********SHOULD BE CALLED HERE********
+                ************************************/
+
+
+               	//******************************************************************************
+               	//-------------------------- Image segmentation and division in Arrays ---------
 
 				/*//cropping the main part of the image from the Original Frame*/
-                cones_image(cv::Rect(0,250,640,100)).copyTo(workingArea);
-
-                //draw the red triangles for parts to discard in the main image
-                cv::rectangle(cones_image, cv::Point(2, 2), cv::Point(638, 248), cv::Scalar(0,0,255),4);
-                cv::rectangle(cones_image, cv::Point(2, 362), cv::Point(638, 478), cv::Scalar(0,0,255),4);
-
-                //draw the green rectangles for the working areas
-                cv::rectangle(cones_image, cv::Point(2, 252), cv::Point(318, 358), cv::Scalar(0,255,0), 4);
-                cv::rectangle(cones_image, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
+                //cones_image(cv::Rect(0,250,640,100)).copyTo(workingArea);
 
                 //cropping the left and right sides from the workingArea
-                cones_image(cv::Rect(0,250,320,110)).copyTo(leftImg);
-                cones_image(cv::Rect(320,250,320,110)).copyTo(rightImg);
 
+                if (blueOnLeft==-1){
+	                yellow_cones(cv::Rect(0,250,320,110)).copyTo(leftImg);
+	                blue_cones(cv::Rect(320,250,320,110)).copyTo(rightImg);
+            	} else {
+            		yellow_cones(cv::Rect(0,250,320,110)).copyTo(rightImg);
+	                blue_cones(cv::Rect(320,250,320,110)).copyTo(leftImg);
+            	}
+                //creation of the left frame segments
                 int maxWidth = 320;
                 int counter = 0;
-                leftImg(cv::Rect(0,0,maxWidth,110)).copyTo(leftArray[counter]);
-
-                /*for (int i = 5; i > 0; i--)
+                for (int i = 5; i > 0; i--)
                 {
-                	leftImg(cv::Rect(maxWidth-64,0,maxWidth,110)).copyTo(leftArray[counter]);
+                	leftImg(cv::Rect(maxWidth-64,0,64,110)).copyTo(leftArray[counter]);
                 	maxWidth = maxWidth - 64;
                 	counter++;
-                }*/
+                }
+
+                //creation of the Right frame segments
+                int startPoint = 0;
+				for (int i = 0; i < 5; i++)
+                {
+                	rightImg(cv::Rect(startPoint,0,64,110)).copyTo(rightArray[i]);
+                	startPoint = startPoint + 64;
+                }
+
+                //Call to THE FUNCTION to check the presence of the cones in the segments
+
+                for (int i = 0; i < 5; ++i)
+                {
+                	rightBooleans[i] = checkConePresence(rightArray[i]);
+                	leftBooleans[i] = checkConePresence(leftArray[i]);
+                }
+
+                for (int i = 0; i < 5; ++i)
+                {
+                	std::cout << rightBooleans[i] <<"    "<< leftBooleans[i] << std::endl;
+                }
+
+                //------------------------------Finish Image segmentation-----------------------
+               	//******************************************************************************
 
 
-                cv::namedWindow("left1", CV_WINDOW_AUTOSIZE);
-                /*cv::namedWindow("left2", CV_WINDOW_AUTOSIZE);
-                cv::namedWindow("left3", CV_WINDOW_AUTOSIZE);
-                cv::namedWindow("left4", CV_WINDOW_AUTOSIZE);
-                cv::namedWindow("left5", CV_WINDOW_AUTOSIZE);
+
+
+
+                /*cv::namedWindow("cones", CV_WINDOW_AUTOSIZE);
+                cv::namedWindow("1", CV_WINDOW_AUTOSIZE);
+                cv::namedWindow("2", CV_WINDOW_AUTOSIZE);
+                cv::namedWindow("3", CV_WINDOW_AUTOSIZE);
+                cv::namedWindow("4", CV_WINDOW_AUTOSIZE);
+                cv::namedWindow("5", CV_WINDOW_AUTOSIZE);
 				*/
                 // Display image on your screen.
                 if (VERBOSE) {
                     cv::imshow(sharedMemory->name().c_str(), img);
-                    //cv::imshow("cones", leftImg);
-                    cv::imshow("left1", leftArray[0]);
-                    /*cv::imshow("left2", leftArray[1]);
-                    cv::imshow("left3", leftArray[2]);
-                    cv::imshow("left4", leftArray[3]);
-                    cv::imshow("left5", leftArray[4]);*/
+                    /*cv::imshow("cones", leftImg);
+                    cv::imshow("1", rightArray[0]);
+                    cv::imshow("2", rightArray[1]);
+                    cv::imshow("3", rightArray[2]);
+                    cv::imshow("4", rightArray[3]);
+                    cv::imshow("5", rightArray[4]);*/
                     cv::waitKey(1);
                 }
             }
@@ -233,3 +279,6 @@ int32_t main(int32_t argc, char **argv) {
     }
     return retCode;
 }
+
+
+
