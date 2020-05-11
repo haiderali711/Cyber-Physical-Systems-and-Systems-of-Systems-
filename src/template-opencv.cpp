@@ -29,6 +29,14 @@
 double HAS_CONES_THRESHHOLD = 0.2;
 int BLUE_IS_LEFT = 1;
 
+void decideSideCones (cv::Mat left, cv::Mat right) {
+    if (imageContainsCones(left) && imageContainsCones(right)) {
+        BLUE_IS_LEFT = 1;
+    } else {
+        BLUE_IS_LEFT = -1;
+    }
+}
+
 bool imageContainsCones (cv::Mat image) {
     int amount = 0;
 
@@ -68,12 +76,13 @@ int32_t main(int32_t argc, char **argv) {
     std::cerr << "Example: " << argv[0] << " --cid=253 --name=img --width=640 --height=480 --verbose" << std::endl;
 }
 else {
-        // Extract the values from the command line parameters
+    // Extract the values from the command line parameters
     const std::string NAME{commandlineArguments["name"]};
     const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
     const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
     const bool VERBOSE{commandlineArguments.count("verbose") != 0};
 
+    const int start_time = time (NULL);
 
         // Attach to the shared memory.
     std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
@@ -219,6 +228,11 @@ else {
                     cv::imshow(sharedMemory->name().c_str(), img);
                     cv::imshow("cones", cones_image);
                     cv::waitKey(1);
+                }
+
+                //Decide whether the cones on the left are blue or yellow
+                if (start_time - time (NULL) == 2) {
+                    decideSideCones();
                 }
             }
         }
