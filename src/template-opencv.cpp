@@ -27,22 +27,22 @@
 
 
 double HAS_CONES_THRESHHOLD = 0.2;
+int BLUE_IS_LEFT = 1;
 
 bool imageContainsCones (cv::Mat image) {
     int amount = 0;
 
-    for (int x = 240;x < image.rows; x++)//To loop through all the pixels
-    {
-        for (int y = 0; y < image.cols; y++)
-        {
-            if(image.at<uchar>(x,y) == 255){
+    //To loop through all the pixels
+    for (int x = 240;x < image.rows; x++) {
+        for (int y = 0; y < image.cols; y++) {
+            if(image.at<uchar>(x,y) == 255) {
                 amount++;
             }
         }
     }
-    int n_pixels = (image.rows - 240)*image.cols;
-    double white_percentage = (double)(amount * 100) / n_pixels;
-    std::cout << std::endl << "Amount: " << amount << "/" << n_pixels << "    " << white_percentage << "%" << std::endl;
+    int total_pixels = (image.rows - 240)*image.cols;
+    double white_percentage = (double)(amount * 100) / total_pixels;
+    std::cout << std::endl << "Amount: " << amount << "/" << total_pixels << "    " << white_percentage << "%" << std::endl;
     
     if (white_percentage > HAS_CONES_THRESHHOLD) {
         return true;
