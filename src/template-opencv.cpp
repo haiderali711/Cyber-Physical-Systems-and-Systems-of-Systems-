@@ -161,9 +161,6 @@ else {
                 cv::rectangle(img, cv::Point(2, 252), cv::Point(318, 358), cv::Scalar(0,255,0), 4);
                 cv::rectangle(img, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
 
-                //cropping the left and right sides from the workingArea
-                img(cv::Rect(0,250,320,110)).copyTo(leftImg);
-                img(cv::Rect(320,250,320,110)).copyTo(rightImg);
 
 				// Apply gamma color correction by factor 0.4 
                 double gamma_ = 0.4;
@@ -221,18 +218,31 @@ else {
                 cv::addWeighted(blue_cones, 1.0, yellow_cones, 1.0, 0.0, cones_image);
                 cv::GaussianBlur(cones_image, cones_image, cv::Size(3, 3), 0); 
 
+                //cropping the left and right sides from the workingArea
+                std::cout<<"Blue is left: "<<BLUE_IS_LEFT <<std::endl;
+                if(BLUE_IS_LEFT){
+                blue_cones(cv::Rect(0,250,320,110)).copyTo(leftImg);
+                yellow_cones(cv::Rect(320,250,320,110)).copyTo(rightImg);
+                }
+                else{
+                blue_cones(cv::Rect(0,250,320,110)).copyTo(rightImg);
+                yellow_cones(cv::Rect(320,250,320,110)).copyTo(leftImg);
+                }
+
                 cv::namedWindow("cones", CV_WINDOW_AUTOSIZE);
 
                 // Display image on your screen.
                 if (VERBOSE) {
                     cv::imshow(sharedMemory->name().c_str(), img);
                     cv::imshow("cones", cones_image);
+                    cv::imshow("b_cones", blue_cones);
+                    cv::imshow("y_cones", yellow_cones);
                     cv::waitKey(1);
                 }
 
                 //Decide whether the cones on the left are blue or yellow
                 if (start_time - time (NULL) == 2) {
-                    decideSideCones();
+                    decideSideCones(leftImg, rightImg);
                 }
             }
         }
