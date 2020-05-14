@@ -42,16 +42,15 @@ bool checkConePresence (cv::Mat image) {
     int amount = 0;
 
     //To loop through all the pixels
-    for (int x = 240;x < image.rows; x++) {
+    for (int x = 0;x < image.rows; x++) {
         for (int y = 0; y < image.cols; y++) {
             if(image.at<uchar>(x,y) == 255) {
                 amount++;
             }
         }
     }
-    int total_pixels = (image.rows - 240)*image.cols;
+    int total_pixels = (image.rows)*image.cols;
     double white_percentage = (double)(amount * 100) / total_pixels;
-    std::cout << std::endl << "Amount: " << amount << "/" << total_pixels << "    " << white_percentage << "%" << std::endl;
     
     if (white_percentage > HAS_CONES_THRESHHOLD) {
         return true;
@@ -68,6 +67,78 @@ void decideSideCones (cv::Mat left, cv::Mat right) {
     } else {
         BLUE_IS_LEFT = -1;
     }
+}
+
+//set HSV values for blue cones
+int lowH = 105;
+int highH = 140;
+int lowS = 42;
+int highS = 107;
+int lowV = 107;
+int highV = 163;
+
+cv::Mat erosion_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+cv::Mat dilation_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+
+cv::Mat applyGammaCorrection (cv::Mat img){
+    // Apply gamma color correction by factor 0.4 
+    double gamma_ = 0.4;
+    cv::Mat lookUpTable(1, 256, CV_8U);
+    uchar* p = lookUpTable.ptr();
+    for( int i = 0; i < 256; ++i)
+        p[i] = cv::saturate_cast<uchar>(pow(i / 255.0, gamma_) * 255.0);
+    cv::Mat gamma_corrected = img.clone();
+    cv::LUT(img, lookUpTable, gamma_corrected);
+
+    return gamma_corrected;
+}
+
+cv::Mat applyBlueFilter (cv::Mat img) {
+    cv::Mat blue_cones;   // Thresh Image
+    cv::Mat hsvImg;
+
+    cv::Mat gamma_corrected = applyGammaCorrection(img);
+
+    // convert the gamma corrected image to HSV
+    cv::cvtColor(gamma_corrected, hsvImg, CV_BGR2HSV);
+
+    // Apply HSV filter
+    cv::inRange(hsvImg, cv::Scalar(lowH, lowS, lowV), cv::Scalar(highH, highS, highV), blue_cones);
+
+    // Erosion
+    cv::erode(blue_cones, blue_cones, erosion_kernel);
+
+    // Dilation
+    cv::dilate(blue_cones, blue_cones, dilation_kernel);
+
+    return blue_cones;
+}
+
+//set HSV values for yellow cones
+int lowH2 = 20;
+int highH2 = 30;
+int lowS2 = 0;
+int highS2 = 255;
+int lowV2 = 20;
+int highV2 = 255;
+
+cv::Mat applyYellowFilter (cv::Mat img) {
+    cv::Mat yellow_cones; // Tresh Image
+    cv::Mat hsvImg;
+
+    // convert the gamma corrected image to HSV
+    cv::cvtColor(img, hsvImg, CV_BGR2HSV);
+
+    // Apply HSV filter
+    cv::inRange(hsvImg, cv::Scalar(lowH2, lowS2, lowV2), cv::Scalar(highH2, highS2, highV2), yellow_cones);
+    
+    // Erosion         
+    cv::erode(yellow_cones, yellow_cones, erosion_kernel);
+
+    // Dilation
+    cv::dilate(yellow_cones, yellow_cones, dilation_kernel);
+
+    return yellow_cones;
 }
 
 
@@ -163,51 +234,10 @@ else {
 
 
                 //*********************Image Manipulation for Color detection ****************	
-				// Apply gamma color correction by factor 0.4 
-                double gamma_ = 0.4;
-                cv::Mat lookUpTable(1, 256, CV_8U);
-                uchar* p = lookUpTable.ptr();
-                for( int i = 0; i < 256; ++i)
-                    p[i] = cv::saturate_cast<uchar>(pow(i / 255.0, gamma_) * 255.0);
-                cv::Mat gamma_corrected = img.clone();
-                cv::LUT(img, lookUpTable, gamma_corrected);
+				
+                cv::Mat blue_cones = applyBlueFilter(img);
+                cv::Mat yellow_cones = applyYellowFilter(img);
 
-                //set HSV values for blue cones
-                int lowH = 105;
-                int highH = 140;
-                int lowS = 42;
-                int highS = 107;
-                int lowV = 107;
-                int highV = 163;
-
-                //set HSV values for yellow cones
-                int lowH2 = 20;
-                int highH2 = 30;
-                int lowS2 = 0;
-                int highS2 = 255;
-                int lowV2 = 20;
-                int highV2 = 255;
-
-                cv::Mat blue_cones;   // Thresh Image
-                cv::Mat yellow_cones; // Tresh Image
-
-                // convert the gamma corrected image to HSV
-                cv::cvtColor(gamma_corrected, hsvImg, CV_BGR2HSV);
-                // Apply HSV filter
-                cv::inRange(hsvImg, cv::Scalar(lowH, lowS, lowV), cv::Scalar(highH, highS, highV), blue_cones);
-                cv::inRange(hsvImg, cv::Scalar(lowH2, lowS2, lowV2), cv::Scalar(highH2, highS2, highV2), yellow_cones);
-
-
-                // Erosion
-                cv::Mat erosion_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-                cv::erode(blue_cones, blue_cones, erosion_kernel);
-                cv::erode(yellow_cones, yellow_cones, erosion_kernel);
-
-
-                // Dilation
-                cv::Mat dilation_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
-                cv::dilate(blue_cones, blue_cones, dilation_kernel);
-                cv::dilate(yellow_cones, yellow_cones, dilation_kernel);
 
                 
                	/*addWeighted is commented here below cz we dont wanna blend both 
@@ -226,7 +256,7 @@ else {
 
                 //cropping the left and right sides from the workingArea
 
-                std::cout<<"Blue is left: "<<BLUE_IS_LEFT <<std::endl;
+                std::cout << std::endl <<"Blue is left: "<<BLUE_IS_LEFT;
                 if (BLUE_IS_LEFT) {
                     blue_cones(cv::Rect(0,250,320,110)).copyTo(leftImg);
                     yellow_cones(cv::Rect(320,250,320,110)).copyTo(rightImg);
@@ -262,7 +292,7 @@ else {
 
                 for (int i = 0; i < 5; ++i)
                 {
-                	std::cout << rightBooleans[i] <<"    "<< leftBooleans[i] << std::endl;
+                	std::cout << std::endl << rightBooleans[i] <<"    "<< leftBooleans[i];
                 }
 
                 //------------------------------Finish Image segmentation-----------------------
@@ -283,15 +313,15 @@ else {
                 if (VERBOSE) {
                     cv::imshow(sharedMemory->name().c_str(), img);
 
-                    cv::imshow("b_cones", blue_cones);
-                    cv::imshow("y_cones", yellow_cones);
+                    //cv::imshow("b_cones", blue_cones);
+                    //cv::imshow("y_cones", yellow_cones);
                     
-                    /*cv::imshow("cones", leftImg);
+                    cv::imshow("cones", leftImg);
                     cv::imshow("1", rightArray[0]);
                     cv::imshow("2", rightArray[1]);
                     cv::imshow("3", rightArray[2]);
                     cv::imshow("4", rightArray[3]);
-                    cv::imshow("5", rightArray[4]);*/
+                    cv::imshow("5", rightArray[4]);
 
                     cv::waitKey(1);
                 }
