@@ -34,6 +34,9 @@ double HAS_CONES_THRESHHOLD = 0.2;
 *************Scenario Boolean********
 ************************************/
 int BLUE_IS_LEFT = 1; //the blue cone are Not on the left side -> default	
+int SEGMENTS = 10;
+double STEERING_LIMIT = 0.32;
+double STEERING_UNIT = STEERING_LIMIT / SEGMENTS;
 
 /********************************************
 ****************CONE CHECKING FUNCTION*******
@@ -62,6 +65,7 @@ bool checkConePresence (cv::Mat image) {
 ****************SIDE CHECKING FUNCTION*******
 ********************************************/
 void decideSideCones (cv::Mat left, cv::Mat right) {
+    std::cout << checkConePresence(left) << " "<< checkConePresence(right)<< checkConePresence(left) && checkConePresence(right);
     if (checkConePresence(left) && checkConePresence(right)) {
         BLUE_IS_LEFT = 1;
     } else {
@@ -169,7 +173,8 @@ else {
     const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
     const bool VERBOSE{commandlineArguments.count("verbose") != 0};
 
-    const int start_time = time (NULL);
+    //time in decimals of a second
+    const int start_time = time (NULL)*10;
 
         // Attach to the shared memory.
     std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
@@ -194,13 +199,13 @@ else {
 
 
             //declaration of Variables related Image segmentation and color detection
-
+            
             cv::Mat leftImg;				//left segment with just cones 
             cv::Mat rightImg;				//right segment with just cones
-            cv::Mat leftArray [5];			//smaller segments from leftImage
-            cv::Mat rightArray [5];			//smaller segments from rightImage
-            bool leftBooleans [5];			//boolean indication for cones presence
-            bool rightBooleans [5];			//boolean indication for cones presence
+            cv::Mat leftArray [SEGMENTS];			//smaller segments from leftImage
+            cv::Mat rightArray [SEGMENTS];			//smaller segments from rightImage
+            bool leftBooleans [SEGMENTS];			//boolean indication for cones presence
+            bool rightBooleans [SEGMENTS];			//boolean indication for cones presence
             cv::Mat hsvImg;    				// HSV image for the original frame
 
             //std::vector v3fCircles;  // 3 element vector of floats, this will be the pass by reference output of HoughCircles()
@@ -266,34 +271,41 @@ else {
                 }
                 //creation of the left frame segments
                 int maxWidth = 320;
+                int slotWidth = maxWidth / SEGMENTS;
                 int counter = 0;
-                for (int i = 5; i > 0; i--)
+                for (int i = SEGMENTS; i > 0; i--)
                 {
-                	leftImg(cv::Rect(maxWidth-64,0,64,110)).copyTo(leftArray[counter]);
-                	maxWidth = maxWidth - 64;
+                	leftImg(cv::Rect(maxWidth-slotWidth,0,slotWidth,110)).copyTo(leftArray[counter]);
+                	maxWidth = maxWidth - slotWidth;
                 	counter++;
                 }
 
                 //creation of the Right frame segments
                 int startPoint = 0;
-				for (int i = 0; i < 5; i++)
+				for (int i = 0; i < SEGMENTS; i++)
                 {
-                	rightImg(cv::Rect(startPoint,0,64,110)).copyTo(rightArray[i]);
-                	startPoint = startPoint + 64;
+                	rightImg(cv::Rect(startPoint,0,slotWidth,110)).copyTo(rightArray[i]);
+                	startPoint = startPoint + slotWidth;
                 }
 
                 //Call to THE FUNCTION to check the presence of the cones in the segments
 
-                for (int i = 0; i < 5; ++i)
+                int countLeft = 0,countRight = 0;
+                
+                for (int i = 0; i < SEGMENTS; ++i)
                 {
                 	rightBooleans[i] = checkConePresence(rightArray[i]);
                 	leftBooleans[i] = checkConePresence(leftArray[i]);
+                    if (rightBooleans[i] && countRight==0)  countRight = SEGMENTS - i;
+                    if (leftBooleans[i] && countLeft==0)  countLeft = SEGMENTS - i;
                 }
 
-                for (int i = 0; i < 5; ++i)
-                {
-                	std::cout << std::endl << rightBooleans[i] <<"    "<< leftBooleans[i];
-                }
+                std::cout << std::endl << countLeft << " " << countRight;
+
+                int delta = countLeft - countRight;
+
+                double STEERING_TO_APPLY = delta * BLUE_IS_LEFT * STEERING_UNIT; 
+                std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
 
                 //------------------------------Finish Image segmentation-----------------------
                	//******************************************************************************
@@ -316,18 +328,15 @@ else {
                     //cv::imshow("b_cones", blue_cones);
                     //cv::imshow("y_cones", yellow_cones);
                     
-                    cv::imshow("cones", leftImg);
-                    cv::imshow("1", rightArray[0]);
-                    cv::imshow("2", rightArray[1]);
-                    cv::imshow("3", rightArray[2]);
-                    cv::imshow("4", rightArray[3]);
-                    cv::imshow("5", rightArray[4]);
+                    cv::imshow("conesL", leftImg);
+                    cv::imshow("conesR", rightImg);
 
                     cv::waitKey(1);
                 }
 
                 //Decide whether the cones on the left are blue or yellow
-                if (start_time - time (NULL) == 2) {
+                if (start_time - time (NULL)*10 == 5) {
+                    std::cout<<"TESTTTTT";
                     decideSideCones(leftImg, rightImg);
                 }
             }
