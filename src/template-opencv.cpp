@@ -26,8 +26,9 @@
 #include <ctime>
 
 
-
+//Threshhold to detect cones in image (white percentage related to black space in HSV image)
 double HAS_CONES_THRESHHOLD = 0.2;
+
 /************************************
 *************VERY IMPORTANT**********
 *************Scenario Boolean********
@@ -62,7 +63,7 @@ bool checkConePresence (cv::Mat image) {
 ****************SIDE CHECKING FUNCTION*******
 ********************************************/
 void decideSideCones (cv::Mat left, cv::Mat right) {
-    if (imageContainsCones(left) && imageContainsCones(right)) {
+    if (checkConePresence(left) && checkConePresence(right)) {
         BLUE_IS_LEFT = 1;
     } else {
         BLUE_IS_LEFT = -1;
@@ -282,7 +283,6 @@ else {
                 if (VERBOSE) {
                     cv::imshow(sharedMemory->name().c_str(), img);
 
-                    cv::imshow("cones", cones_image);
                     cv::imshow("b_cones", blue_cones);
                     cv::imshow("y_cones", yellow_cones);
                     
