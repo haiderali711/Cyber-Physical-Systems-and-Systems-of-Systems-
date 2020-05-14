@@ -14,29 +14,61 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 // Include the single-file, header-only middleware libcluon to create high-performance microservices
 #include "cluon-complete.hpp"
 // Include the OpenDLV Standard Message Set that contains messages that are usually exchanged for automotive or robotic applications
 #include "opendlv-standard-message-set.hpp"
- 
+
 // Include the GUI and image processing header files from OpenCV
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <ctime>
- 
 
+
+//Threshhold to detect cones in image (white percentage related to black space in HSV image)
+double HAS_CONES_THRESHHOLD = 0.2;
+
+/************************************
+*************VERY IMPORTANT**********
+*************Scenario Boolean********
+************************************/
+int BLUE_IS_LEFT = 1; //the blue cone are Not on the left side -> default	
 
 /********************************************
 ****************CONE CHECKING FUNCTION*******
 ********************************************/
-bool checkConePresence(cv::Mat imageSegment) {
+bool checkConePresence (cv::Mat image) {
+    int amount = 0;
 
-	//THE FUNCTIONS IMPLEMENTATION GOES HERE
+    //To loop through all the pixels
+    for (int x = 240;x < image.rows; x++) {
+        for (int y = 0; y < image.cols; y++) {
+            if(image.at<uchar>(x,y) == 255) {
+                amount++;
+            }
+        }
+    }
+    int total_pixels = (image.rows - 240)*image.cols;
+    double white_percentage = (double)(amount * 100) / total_pixels;
+    std::cout << std::endl << "Amount: " << amount << "/" << total_pixels << "    " << white_percentage << "%" << std::endl;
+    
+    if (white_percentage > HAS_CONES_THRESHHOLD) {
+        return true;
+    }
+    return false;
+}
 
-	//RETURNING TRUE just int case for the sake of having a testing prototype with default TRUE
-  	return true;
-} 
+/********************************************
+****************SIDE CHECKING FUNCTION*******
+********************************************/
+void decideSideCones (cv::Mat left, cv::Mat right) {
+    if (checkConePresence(left) && checkConePresence(right)) {
+        BLUE_IS_LEFT = 1;
+    } else {
+        BLUE_IS_LEFT = -1;
+    }
+}
 
 
 
@@ -48,46 +80,46 @@ int32_t main(int32_t argc, char **argv) {
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
     auto commandlineArguments = cluon::getCommandlineArguments(argc, argv);
     if ( (0 == commandlineArguments.count("cid")) ||
-         (0 == commandlineArguments.count("name")) ||
-         (0 == commandlineArguments.count("width")) ||
-         (0 == commandlineArguments.count("height")) ) {
+       (0 == commandlineArguments.count("name")) ||
+       (0 == commandlineArguments.count("width")) ||
+       (0 == commandlineArguments.count("height")) ) {
         std::cerr << argv[0] << " attaches to a shared memory area containing an ARGB image." << std::endl;
-        std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> --name=<name of shared memory area> [--verbose]" << std::endl;
-        std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
-        std::cerr << "         --name:   name of the shared memory area to attach" << std::endl;
-        std::cerr << "         --width:  width of the frame" << std::endl;
-        std::cerr << "         --height: height of the frame" << std::endl;
-        std::cerr << "Example: " << argv[0] << " --cid=253 --name=img --width=640 --height=480 --verbose" << std::endl;
-    }
-    else {
-        // Extract the values from the command line parameters
-        const std::string NAME{commandlineArguments["name"]};
-        const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
-        const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
-        const bool VERBOSE{commandlineArguments.count("verbose") != 0};
- 
- 
+    std::cerr << "Usage:   " << argv[0] << " --cid=<OD4 session> --name=<name of shared memory area> [--verbose]" << std::endl;
+    std::cerr << "         --cid:    CID of the OD4Session to send and receive messages" << std::endl;
+    std::cerr << "         --name:   name of the shared memory area to attach" << std::endl;
+    std::cerr << "         --width:  width of the frame" << std::endl;
+    std::cerr << "         --height: height of the frame" << std::endl;
+    std::cerr << "Example: " << argv[0] << " --cid=253 --name=img --width=640 --height=480 --verbose" << std::endl;
+}
+else {
+    // Extract the values from the command line parameters
+    const std::string NAME{commandlineArguments["name"]};
+    const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
+    const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
+    const bool VERBOSE{commandlineArguments.count("verbose") != 0};
+
+    const int start_time = time (NULL);
+
         // Attach to the shared memory.
-        std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
-        if (sharedMemory && sharedMemory->valid()) {
-            std::clog << argv[0] << ": Attached to shared memory '" << sharedMemory->name() << " (" << sharedMemory->size() << " bytes)." << std::endl;
- 
+    std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
+    if (sharedMemory && sharedMemory->valid()) {
+        std::clog << argv[0] << ": Attached to shared memory '" << sharedMemory->name() << " (" << sharedMemory->size() << " bytes)." << std::endl;
+
             // Interface to a running OpenDaVINCI session where network messages are exchanged.
             // The instance od4 allows you to send and receive messages.
-            cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
- 
-            opendlv::proxy::GroundSteeringRequest gsr;
-            std::mutex gsrMutex;
-            auto onGroundSteeringRequest = [&gsr, &gsrMutex](cluon::data::Envelope &&env){
+        cluon::OD4Session od4{static_cast<uint16_t>(std::stoi(commandlineArguments["cid"]))};
+
+        opendlv::proxy::GroundSteeringRequest gsr;
+        std::mutex gsrMutex;
+        auto onGroundSteeringRequest = [&gsr, &gsrMutex](cluon::data::Envelope &&env){
                 // The envelope data structure provide further details, such as sampleTimePoint as shown in this test case:
                 // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
-                std::lock_guard<std::mutex> lck(gsrMutex);
-                gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
+            std::lock_guard<std::mutex> lck(gsrMutex);
+            gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
                 //std::cout << "lambda: groundSteering = " << gsr.groundSteering() << std::endl;
-            };
- 
+        };
+
             od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
-           
 
 
             //declaration of Variables related Image segmentation and color detection
@@ -108,7 +140,7 @@ int32_t main(int32_t argc, char **argv) {
                 cv::Mat img;
                 // Wait for a notification of a new frame.
                 sharedMemory->wait();
- 
+
                 // Lock the shared memory.
                 sharedMemory->lock();
                 {
@@ -118,7 +150,7 @@ int32_t main(int32_t argc, char **argv) {
                 }
                 // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
                 sharedMemory->unlock();
- 
+
                 // TODO: Do something with the frame.
 
                 //draw the red triangles for parts to discard in the main image
@@ -140,7 +172,7 @@ int32_t main(int32_t argc, char **argv) {
                 cv::Mat gamma_corrected = img.clone();
                 cv::LUT(img, lookUpTable, gamma_corrected);
 
-                //set HSV values
+                //set HSV values for blue cones
                 int lowH = 105;
                 int highH = 140;
                 int lowS = 42;
@@ -178,28 +210,12 @@ int32_t main(int32_t argc, char **argv) {
                 cv::dilate(yellow_cones, yellow_cones, dilation_kernel);
 
                 
-                
-                cv::GaussianBlur(blue_cones, blue_cones, cv::Size(3, 3), 0);   //Blur Effect
-                cv::GaussianBlur(yellow_cones, yellow_cones, cv::Size(3, 3), 0);   //Blur Effect
-                
-               	
                	/*addWeighted is commented here below cz we dont wanna blend both 
                	blue and yellow colors in one image
                	cv::Mat cones_image;
                	cv::addWeighted(blue_cones, 1.0, yellow_cones, 1.0, 0.0, cones_image);
-               	cv::GaussianBlur(cones_image, cones_image, cv::Size(3, 3), 0); */
-
-
-                /************************************
-                *************VERY IMPORTANT**********
-                *************Scenario Boolean********
-                ************************************/
-                int blueOnLeft = -1;				//the blue cone are Not on the left side -> default	
-                /************************************
-                ********THE METHOD FOR CHECKING******
-                ********THE INITIAL CONES SETTING ***
-                ********SHOULD BE CALLED HERE********
-                ************************************/
+               	cv::GaussianBlur(blue_cones, blue_cones, cv::Size(3, 3), 0);   //Blur Effect
+                cv::GaussianBlur(yellow_cones, yellow_cones, cv::Size(3, 3), 0);   //Blur Effect */
 
 
                	//******************************************************************************
@@ -210,13 +226,14 @@ int32_t main(int32_t argc, char **argv) {
 
                 //cropping the left and right sides from the workingArea
 
-                if (blueOnLeft==-1){
-	                yellow_cones(cv::Rect(0,250,320,110)).copyTo(leftImg);
-	                blue_cones(cv::Rect(320,250,320,110)).copyTo(rightImg);
-            	} else {
-            		yellow_cones(cv::Rect(0,250,320,110)).copyTo(rightImg);
-	                blue_cones(cv::Rect(320,250,320,110)).copyTo(leftImg);
-            	}
+                std::cout<<"Blue is left: "<<BLUE_IS_LEFT <<std::endl;
+                if (BLUE_IS_LEFT) {
+                    blue_cones(cv::Rect(0,250,320,110)).copyTo(leftImg);
+                    yellow_cones(cv::Rect(320,250,320,110)).copyTo(rightImg);
+                } else {
+                    blue_cones(cv::Rect(0,250,320,110)).copyTo(rightImg);
+                    yellow_cones(cv::Rect(320,250,320,110)).copyTo(leftImg);
+                }
                 //creation of the left frame segments
                 int maxWidth = 320;
                 int counter = 0;
@@ -265,13 +282,23 @@ int32_t main(int32_t argc, char **argv) {
                 // Display image on your screen.
                 if (VERBOSE) {
                     cv::imshow(sharedMemory->name().c_str(), img);
+
+                    cv::imshow("b_cones", blue_cones);
+                    cv::imshow("y_cones", yellow_cones);
+                    
                     /*cv::imshow("cones", leftImg);
                     cv::imshow("1", rightArray[0]);
                     cv::imshow("2", rightArray[1]);
                     cv::imshow("3", rightArray[2]);
                     cv::imshow("4", rightArray[3]);
                     cv::imshow("5", rightArray[4]);*/
+
                     cv::waitKey(1);
+                }
+
+                //Decide whether the cones on the left are blue or yellow
+                if (start_time - time (NULL) == 2) {
+                    decideSideCones(leftImg, rightImg);
                 }
             }
         }
@@ -279,6 +306,4 @@ int32_t main(int32_t argc, char **argv) {
     }
     return retCode;
 }
-
-
 
