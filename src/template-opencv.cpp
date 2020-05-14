@@ -42,16 +42,15 @@ bool checkConePresence (cv::Mat image) {
     int amount = 0;
 
     //To loop through all the pixels
-    for (int x = 240;x < image.rows; x++) {
+    for (int x = 0;x < image.rows; x++) {
         for (int y = 0; y < image.cols; y++) {
             if(image.at<uchar>(x,y) == 255) {
                 amount++;
             }
         }
     }
-    int total_pixels = (image.rows - 240)*image.cols;
+    int total_pixels = (image.rows)*image.cols;
     double white_percentage = (double)(amount * 100) / total_pixels;
-    std::cout << std::endl << "Amount: " << amount << "/" << total_pixels << "    " << white_percentage << "%" << std::endl;
     
     if (white_percentage > HAS_CONES_THRESHHOLD) {
         return true;
@@ -257,7 +256,7 @@ else {
 
                 //cropping the left and right sides from the workingArea
 
-                std::cout<<"Blue is left: "<<BLUE_IS_LEFT <<std::endl;
+                std::cout << std::endl <<"Blue is left: "<<BLUE_IS_LEFT;
                 if (BLUE_IS_LEFT) {
                     blue_cones(cv::Rect(0,250,320,110)).copyTo(leftImg);
                     yellow_cones(cv::Rect(320,250,320,110)).copyTo(rightImg);
@@ -293,7 +292,7 @@ else {
 
                 for (int i = 0; i < 5; ++i)
                 {
-                	std::cout << rightBooleans[i] <<"    "<< leftBooleans[i] << std::endl;
+                	std::cout << std::endl << rightBooleans[i] <<"    "<< leftBooleans[i];
                 }
 
                 //------------------------------Finish Image segmentation-----------------------
@@ -314,15 +313,15 @@ else {
                 if (VERBOSE) {
                     cv::imshow(sharedMemory->name().c_str(), img);
 
-                    cv::imshow("b_cones", blue_cones);
-                    cv::imshow("y_cones", yellow_cones);
+                    //cv::imshow("b_cones", blue_cones);
+                    //cv::imshow("y_cones", yellow_cones);
                     
-                    /*cv::imshow("cones", leftImg);
+                    cv::imshow("cones", leftImg);
                     cv::imshow("1", rightArray[0]);
                     cv::imshow("2", rightArray[1]);
                     cv::imshow("3", rightArray[2]);
                     cv::imshow("4", rightArray[3]);
-                    cv::imshow("5", rightArray[4]);*/
+                    cv::imshow("5", rightArray[4]);
 
                     cv::waitKey(1);
                 }
