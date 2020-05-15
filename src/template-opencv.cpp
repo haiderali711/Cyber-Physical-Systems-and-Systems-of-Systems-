@@ -23,7 +23,7 @@
 // Include the GUI and image processing header files from OpenCV
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <ctime>
+#include <sys/time.h>
 
 
 //Threshhold to detect cones in image (white percentage related to black space in HSV image)
@@ -61,26 +61,6 @@ bool checkConePresence (cv::Mat image) {
     return false;
 }
 
-/********************************************
-****************SIDE CHECKING FUNCTION*******
-********************************************/
-void decideSideCones (cv::Mat left, cv::Mat right) {
-    std::cout << checkConePresence(left) << " "<< checkConePresence(right)<< checkConePresence(left) && checkConePresence(right);
-    if (checkConePresence(left) && checkConePresence(right)) {
-        BLUE_IS_LEFT = 1;
-    } else {
-        BLUE_IS_LEFT = -1;
-    }
-}
-
-//set HSV values for blue cones
-int lowH = 105;
-int highH = 140;
-int lowS = 42;
-int highS = 107;
-int lowV = 107;
-int highV = 163;
-
 cv::Mat erosion_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
 cv::Mat dilation_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
 
@@ -98,6 +78,14 @@ cv::Mat applyGammaCorrection (cv::Mat img){
 }
 
 cv::Mat applyBlueFilter (cv::Mat img) {
+    //set HSV values for blue cones
+    int lowH = 105;
+    int highH = 140;
+    int lowS = 42;
+    int highS = 107;
+    int lowV = 107;
+    int highV = 163;
+
     cv::Mat blue_cones;   // Thresh Image
     cv::Mat hsvImg;
 
@@ -118,15 +106,15 @@ cv::Mat applyBlueFilter (cv::Mat img) {
     return blue_cones;
 }
 
-//set HSV values for yellow cones
-int lowH2 = 20;
-int highH2 = 30;
-int lowS2 = 0;
-int highS2 = 255;
-int lowV2 = 20;
-int highV2 = 255;
-
 cv::Mat applyYellowFilter (cv::Mat img) {
+    //set HSV values for yellow cones
+    int lowH2 = 20;
+    int highH2 = 30;
+    int lowS2 = 0;
+    int highS2 = 255;
+    int lowV2 = 20;
+    int highV2 = 255;
+
     cv::Mat yellow_cones; // Tresh Image
     cv::Mat hsvImg;
 
@@ -145,7 +133,30 @@ cv::Mat applyYellowFilter (cv::Mat img) {
     return yellow_cones;
 }
 
+/********************************************
+****************SIDE CHECKING FUNCTION*******
+********************************************/
+void decideSideCones (cv::Mat img) {
+    cv::Mat left,right;
+    
+    //apply filters the other way around
+    if (BLUE_IS_LEFT == 1) {
+        right = applyBlueFilter(img);
+        left = applyYellowFilter(img);
+    } else {
+        left = applyBlueFilter(img);
+        right = applyYellowFilter(img);
+    }
+    //crop image
+    left(cv::Rect(0,250,320,110)).copyTo(left);
+    right(cv::Rect(320,250,320,110)).copyTo(right);
 
+    //if the filters applied the other way detect cones then it means that
+    //the variables indicating in which side the blue cones are has to be switched
+    if (checkConePresence(left) && checkConePresence(right)) {
+        BLUE_IS_LEFT = BLUE_IS_LEFT * -1;
+    }
+}
 
 //*****************MAIN**********************
  
@@ -173,8 +184,13 @@ else {
     const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
     const bool VERBOSE{commandlineArguments.count("verbose") != 0};
 
+    //needed for gettinng current time
+    struct timeval  tv;
     //time in decimals of a second
-    const int start_time = time (NULL)*10;
+    gettimeofday(&tv, NULL);
+    const double start_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
+    
+    
 
         // Attach to the shared memory.
     std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
@@ -199,7 +215,7 @@ else {
 
 
             //declaration of Variables related Image segmentation and color detection
-            
+
             cv::Mat leftImg;				//left segment with just cones 
             cv::Mat rightImg;				//right segment with just cones
             cv::Mat leftArray [SEGMENTS];			//smaller segments from leftImage
@@ -262,7 +278,7 @@ else {
                 //cropping the left and right sides from the workingArea
 
                 std::cout << std::endl <<"Blue is left: "<<BLUE_IS_LEFT;
-                if (BLUE_IS_LEFT) {
+                if (BLUE_IS_LEFT == 1) {
                     blue_cones(cv::Rect(0,250,320,110)).copyTo(leftImg);
                     yellow_cones(cv::Rect(320,250,320,110)).copyTo(rightImg);
                 } else {
@@ -302,7 +318,7 @@ else {
 
                 std::cout << std::endl << countLeft << " " << countRight;
 
-                int delta = countLeft - countRight;
+                int delta = countRight - countLeft;
 
                 double STEERING_TO_APPLY = delta * BLUE_IS_LEFT * STEERING_UNIT; 
                 std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
@@ -333,11 +349,14 @@ else {
 
                     cv::waitKey(1);
                 }
+                
+                //calculate current time
+                gettimeofday(&tv, NULL);
+                double current_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
 
                 //Decide whether the cones on the left are blue or yellow
-                if (start_time - time (NULL)*10 == 5) {
-                    std::cout<<"TESTTTTT";
-                    decideSideCones(leftImg, rightImg);
+                if ((int)(current_time - start_time) % 5 == 0) {
+                    decideSideCones(img);
                 }
             }
         }
