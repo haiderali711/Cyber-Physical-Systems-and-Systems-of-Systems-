@@ -69,7 +69,7 @@ double SteeringCalculator::calculateSteering (cv::Mat img, int BLUE_IS_LEFT) {
         if (rightBooleans[i] && countRight==0)  countRight = SEGMENTS - i;
         if (leftBooleans[i] && countLeft==0)  countLeft = SEGMENTS - i;
     }
-    std::cout << std::endl << countLeft << " " << countRight;
+    //std::cout << std::endl << countLeft << " " << countRight;
 	if(countLeft==0 && countRight==0){}
 	else {
     int delta = countRight - countLeft;
