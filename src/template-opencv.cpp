@@ -90,8 +90,6 @@ int32_t main(int32_t argc, char **argv) {
 
 	        od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
 
-
-
 	        cv::Mat img;
 	        // Wait for a notification of a new frame.
             sharedMemory->wait();
@@ -144,8 +142,6 @@ int32_t main(int32_t argc, char **argv) {
 	            // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
 	            sharedMemory->unlock();
 
-
-
                 // TODO: Do something with the frame.
                 //draw the red triangles for parts to discard in the main image
                 cv::rectangle(img, cv::Point(2, 2), cv::Point(638, 248), cv::Scalar(0,0,255),4);
@@ -156,7 +152,7 @@ int32_t main(int32_t argc, char **argv) {
                 cv::rectangle(img, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
 
 
-                //Calculate the Steeing Angle 
+                //Calculate the Steering Angle 
 
                 STEERING_TO_APPLY = steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
                 std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
