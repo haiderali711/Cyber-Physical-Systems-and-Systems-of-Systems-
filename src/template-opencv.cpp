@@ -32,7 +32,7 @@
 *************Scenario Boolean********
 ************************************/
 int BLUE_IS_LEFT = 1; //the blue cone are Not on the left side -> default
-double STEERING_TO_APPLY;
+double STEERING_TO_APPLY= 0.00;
 
 //*****************MAIN**********************
  
@@ -154,7 +154,7 @@ int32_t main(int32_t argc, char **argv) {
 
                 //Calculate the Steering Angle 
 
-                STEERING_TO_APPLY = steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
+                steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
                 std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
 
 

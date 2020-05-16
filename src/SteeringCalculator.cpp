@@ -6,7 +6,7 @@
 int SEGMENTS = 10;
 double STEERING_LIMIT = 0.290888;
 double STEERING_UNIT = STEERING_LIMIT / SEGMENTS;
-double STEERING_TO_APPLY= 0.00;
+double STEERING_ANGLE= 0.00;
 
 
 
@@ -74,10 +74,10 @@ double SteeringCalculator::calculateSteering (cv::Mat img, int BLUE_IS_LEFT) {
 	else {
     int delta = countRight - countLeft;
 
-    STEERING_TO_APPLY = delta * BLUE_IS_LEFT * STEERING_UNIT; 
+    STEERING_ANGLE = delta * BLUE_IS_LEFT * STEERING_UNIT; 
 	}
 
-    return STEERING_TO_APPLY;
+    return STEERING_ANGLE;
 }
 
 //------------------------------Finish Image segmentation-----------------------
