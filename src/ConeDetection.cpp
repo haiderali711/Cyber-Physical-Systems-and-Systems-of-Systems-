@@ -76,12 +76,13 @@ cv::Mat ConeDetection::applyBlueFilter (cv::Mat img) {
 }
 
 cv::Mat ConeDetection::applyYellowFilter (cv::Mat img) {
+
     //set HSV values for yellow cones
     int lowH2 = 20;
     int highH2 = 30;
-    int lowS2 = 0;
+    int lowS2 = 100;
     int highS2 = 255;
-    int lowV2 = 20;
+    int lowV2 = 100;
     int highV2 = 255;
 
     cv::Mat yellow_cones; // Tresh Image
