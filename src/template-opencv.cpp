@@ -103,8 +103,6 @@ int32_t main(int32_t argc, char **argv) {
             }
             // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
             sharedMemory->unlock();
-	        
-	        BLUE_IS_LEFT = coneDetection.decideSideCones(img);
 
 	        // Endless loop; end the program by pressing Ctrl-C.
 	        while (od4.isRunning()) {
@@ -120,8 +118,8 @@ int32_t main(int32_t argc, char **argv) {
                 double current_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
 
                 //Decide whether the cones on the left are blue or yellow
-                if ((int)(current_time - start_time) % 10 == 0) {
-                    BLUE_IS_LEFT = coneDetection.decideSideCones(img);
+                if ((int)(current_time - start_time) % 5 == 0) {
+                    BLUE_IS_LEFT = coneDetection.decideSideCones(img, BLUE_IS_LEFT);
 
                     if (BLUE_IS_LEFT==1){
 	                   	std::cout << std::endl <<"Left : BLUE  || right : YELLOW"<< std::endl;
