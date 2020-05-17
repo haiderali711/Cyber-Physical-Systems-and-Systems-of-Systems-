@@ -106,9 +106,8 @@ cv::Mat ConeDetection::applyYellowFilter (cv::Mat img) {
 /********************************************
 ****************SIDE CHECKING FUNCTION*******
 ********************************************/
-int ConeDetection::decideSideCones (cv::Mat img) {
+int ConeDetection::decideSideCones (cv::Mat img, int BLUE_IS_LEFT) {
     cv::Mat left,right;
-    int BLUE_IS_LEFT = 1; //the blue cone are Not on the left side -> default
 
     //apply filters the other way around
     if (BLUE_IS_LEFT == 1) {

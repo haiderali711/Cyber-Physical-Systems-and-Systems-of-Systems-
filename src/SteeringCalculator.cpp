@@ -33,8 +33,8 @@ double SteeringCalculator::calculateSteering (cv::Mat img, int BLUE_IS_LEFT) {
         blue_cones(cv::Rect(0,250,320,110)).copyTo(leftImg);
         yellow_cones(cv::Rect(320,250,320,110)).copyTo(rightImg);
     } else {
-        blue_cones(cv::Rect(0,250,320,110)).copyTo(rightImg);
-        yellow_cones(cv::Rect(320,250,320,110)).copyTo(leftImg);
+        yellow_cones(cv::Rect(0,250,320,110)).copyTo(leftImg);
+        blue_cones(cv::Rect(320,250,320,110)).copyTo(rightImg);
     }
 
 
@@ -74,7 +74,7 @@ double SteeringCalculator::calculateSteering (cv::Mat img, int BLUE_IS_LEFT) {
 	else {
     int delta = countRight - countLeft;
 
-    STEERING_ANGLE = delta * BLUE_IS_LEFT * STEERING_UNIT; 
+    STEERING_ANGLE = delta * STEERING_UNIT; 
 	}
 
     return STEERING_ANGLE;
