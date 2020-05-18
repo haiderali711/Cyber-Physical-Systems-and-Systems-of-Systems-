@@ -114,13 +114,24 @@ int32_t main(int32_t argc, char **argv) {
 	            // Wait for a notification of a new frame.
 	            sharedMemory->wait();
 
-				//calculate current time
+	            // Lock the shared memory.
+	            sharedMemory->lock();
+	            {
+	                // Copy the pixels from the shared memory into our own data structure.
+	                cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
+	                img = wrapped.clone();
+	            }
+	            // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
+	            sharedMemory->unlock();
+
+
+	            //calculate current time
 	            gettimeofday(&tv, NULL);
                 double current_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
 
                 //Decide whether the cones on the left are blue or yellow
-                if ((int)(current_time - start_time) % 5 == 0) {
-                    BLUE_IS_LEFT = coneDetection.decideSideCones(img, BLUE_IS_LEFT);
+                if ((int)(current_time - start_time) % 10 == 0) {
+                    BLUE_IS_LEFT = coneDetection.decideSideCones(img);
 
                     if (BLUE_IS_LEFT==1){
 	                   	std::cout << std::endl <<"Left : BLUE  || right : YELLOW"<< std::endl;
@@ -131,15 +142,11 @@ int32_t main(int32_t argc, char **argv) {
 	            }
 
 
-	            // Lock the shared memory.
-	            sharedMemory->lock();
-	            {
-	                // Copy the pixels from the shared memory into our own data structure.
-	                cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
-	                img = wrapped.clone();
-	            }
-	            // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
-	            sharedMemory->unlock();
+                //Calculate the Steering Angle 
+
+                STEERING_TO_APPLY= steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
+                std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
+
 
                 // TODO: Do something with the frame.
                 //draw the red triangles for parts to discard in the main image
@@ -151,11 +158,7 @@ int32_t main(int32_t argc, char **argv) {
                 cv::rectangle(img, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
 
 
-                //Calculate the Steering Angle 
-
-                STEERING_TO_APPLY= steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
-                std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
-
+                //creating Json to push as a UDP message
 
                 std::string overlay;
 
