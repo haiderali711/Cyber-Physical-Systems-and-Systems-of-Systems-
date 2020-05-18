@@ -6,10 +6,10 @@
 
 class ConeDetection {
    public:
-    bool checkConePresence (cv::Mat image);
-    cv::Mat applyGammaCorrection (cv::Mat img);
-	cv::Mat applyBlueFilter (cv::Mat img);
-	cv::Mat applyYellowFilter (cv::Mat img);
-    int decideSideCones (cv::Mat img, int BLUE_IS_LEFT);
+    	bool checkConePresence (cv::Mat image);
+    	cv::Mat applyGammaCorrection (cv::Mat img);
+		cv::Mat applyBlueFilter (cv::Mat img);
+		cv::Mat applyYellowFilter (cv::Mat img);
+    	int decideSideCones (cv::Mat img);
 };
 #endif

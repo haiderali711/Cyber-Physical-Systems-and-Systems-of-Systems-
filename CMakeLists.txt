@@ -87,14 +87,26 @@ if(UNIX)
 endif()
 
 # This project uses OpenCV for image processing.
-find_package(OpenCV REQUIRED core highgui imgproc)
+find_package(OpenCV REQUIRED COMPONENTS opencv_core opencv_imgproc opencv_calib3d opencv_video opencv_features2d opencv_ml opencv_highgui opencv_objdetect opencv_imgcodecs)
+#find_package(OpenCV REQUIRED core highgui imgproc)
 include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS})
 set(LIBRARIES ${LIBRARIES} ${OpenCV_LIBS})
 
 ################################################################################
 # Create executable.
+
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/${PROJECT_NAME}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/ConeDetection.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/SteeringCalculator.cpp)
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
+
+
+enable_testing()
+add_executable(${PROJECT_NAME}-Runner 
+		${CMAKE_CURRENT_SOURCE_DIR}/Tests/Tests.cpp 
+		${CMAKE_CURRENT_SOURCE_DIR}/src/SteeringCalculator.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/ConeDetection.cpp)
+target_link_libraries(${PROJECT_NAME}-Runner ${LIBRARIES})
+add_test(NAME ${PROJECT_NAME}-Runner COMMAND ${PROJECT_NAME}-Runner)
+
 
 # Add dependency to OpenDLV Standard Message Set.
 add_custom_target(generate_opendlv_standard_message_set_hpp DEPENDS ${CMAKE_BINARY_DIR}/opendlv-standard-message-set.hpp)

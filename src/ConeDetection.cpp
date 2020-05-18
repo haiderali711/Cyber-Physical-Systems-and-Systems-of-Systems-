@@ -11,18 +11,18 @@ cv::Mat dilation_kernel =cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5
 ********************************************/
 
 
-bool ConeDetection::checkConePresence (cv::Mat image) {
+bool ConeDetection::checkConePresence (cv::Mat croppedImage) {
     int amount = 0;
 
     //To loop through all the pixels
-    for (int x = 0;x < image.rows; x++) {
-        for (int y = 0; y < image.cols; y++) {
-            if(image.at<uchar>(x,y) == 255) {
+    for (int x = 0;x < croppedImage.rows; x++) {
+        for (int y = 0; y < croppedImage.cols; y++) {
+            if(croppedImage.at<uchar>(x,y) == 255) {
                 amount++;
             }
         }
     }
-    int total_pixels = (image.rows)*image.cols;
+    int total_pixels = (croppedImage.rows)*croppedImage.cols;
     double white_percentage = (double)(amount * 100) / total_pixels;
     
     if (white_percentage > HAS_CONES_THRESHHOLD) {
@@ -106,9 +106,9 @@ cv::Mat ConeDetection::applyYellowFilter (cv::Mat img) {
 /********************************************
 ****************SIDE CHECKING FUNCTION*******
 ********************************************/
-int ConeDetection::decideSideCones (cv::Mat img, int BLUE_IS_LEFT) {
+int ConeDetection::decideSideCones (cv::Mat img) {
     cv::Mat left,right;
-
+    /*
     //apply filters the other way around
     if (BLUE_IS_LEFT == 1) {
         right = applyBlueFilter(img);
@@ -116,16 +116,25 @@ int ConeDetection::decideSideCones (cv::Mat img, int BLUE_IS_LEFT) {
     } else {
         left = applyBlueFilter(img);
         right = applyYellowFilter(img);
-    }
+    }*/
+    
+    right = applyBlueFilter(img);
+    left = applyBlueFilter(img);
+
+
     //crop image
     left(cv::Rect(0,250,320,110)).copyTo(left);
     right(cv::Rect(320,250,320,110)).copyTo(right);
 
     //if the filters applied the other way detect cones then it means that
     //the variables indicating in which side the blue cones are has to be switched
-    if (checkConePresence(left) && checkConePresence(right)) {
+    /*if (checkConePresence(left) && checkConePresence(right)) {
         BLUE_IS_LEFT = BLUE_IS_LEFT * -1;
-    }
+    }*/
 
-    return BLUE_IS_LEFT;
+    if (checkConePresence(left)){
+        return 1;
+    }else {
+        return -1;
+    }
 }

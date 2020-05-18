@@ -104,6 +104,7 @@ int32_t main(int32_t argc, char **argv) {
             // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
             sharedMemory->unlock();
 
+            int unitsPerCalculation=0;
 	        // Endless loop; end the program by pressing Ctrl-C.
 	        while (od4.isRunning()) {
 				
@@ -112,23 +113,6 @@ int32_t main(int32_t argc, char **argv) {
 
 	            // Wait for a notification of a new frame.
 	            sharedMemory->wait();
-
-				//calculate current time
-	            gettimeofday(&tv, NULL);
-                double current_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
-
-                //Decide whether the cones on the left are blue or yellow
-                if ((int)(current_time - start_time) % 5 == 0) {
-                    BLUE_IS_LEFT = coneDetection.decideSideCones(img, BLUE_IS_LEFT);
-
-                    if (BLUE_IS_LEFT==1){
-	                   	std::cout << std::endl <<"Left : BLUE  || right : YELLOW"<< std::endl;
-                    }  
-                    if (BLUE_IS_LEFT==-1){
-                       	std::cout << std::endl <<"Left : YELLOW  || right : BLUE"<< std::endl;
-                    }     
-	            }
-
 
 	            // Lock the shared memory.
 	            sharedMemory->lock();
@@ -140,6 +124,30 @@ int32_t main(int32_t argc, char **argv) {
 	            // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
 	            sharedMemory->unlock();
 
+
+	            //calculate current time
+	            gettimeofday(&tv, NULL);
+                double current_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
+
+                //Decide whether the cones on the left are blue or yellow
+                if ((int)(current_time - start_time) % 10 == 0) {
+                    BLUE_IS_LEFT = coneDetection.decideSideCones(img);
+
+                    if (BLUE_IS_LEFT==1){
+	                   	std::cout << std::endl <<"Left : BLUE  || right : YELLOW"<< std::endl;
+                    }  
+                    if (BLUE_IS_LEFT==-1){
+                       	std::cout << std::endl <<"Left : YELLOW  || right : BLUE"<< std::endl;
+                    }     
+	            }
+
+
+                //Calculate the Steering Angle 
+
+                STEERING_TO_APPLY= steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
+                std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
+
+
                 // TODO: Do something with the frame.
                 //draw the red triangles for parts to discard in the main image
                 cv::rectangle(img, cv::Point(2, 2), cv::Point(638, 248), cv::Scalar(0,0,255),4);
@@ -150,11 +158,7 @@ int32_t main(int32_t argc, char **argv) {
                 cv::rectangle(img, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
 
 
-                //Calculate the Steering Angle 
-
-                STEERING_TO_APPLY= steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
-                std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
-
+                //creating Json to push as a UDP message
 
                 std::string overlay;
 
@@ -169,6 +173,12 @@ int32_t main(int32_t argc, char **argv) {
                 cv::putText(img, overlay, cv::Point(20, 20), 1, 1,  cv::Scalar(255,255,255));
 
 
+                unitsPerCalculation++;
+                overlay = "";
+                overlay += "{ \"counter\" :\""+std::to_string(unitsPerCalculation)+"\", \"Original\":\""+std::to_string(gsr.groundSteering())+"\",\"OurSteering\" : \""+std::to_string(STEERING_TO_APPLY)+"\""+"}"; 
+                cluon::UDPSender sender("127.0.0.1", 1234);
+                sender.send(std::move(overlay));
+                std::cout << std::endl << overlay;
 
 
 
