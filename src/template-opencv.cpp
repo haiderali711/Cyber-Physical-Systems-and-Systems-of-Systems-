@@ -109,7 +109,7 @@ int32_t main(int32_t argc, char **argv) {
             sharedMemory->unlock();
 
 	        // Endless loop; end the program by pressing Ctrl-C.
-			fstream::ofstream csvFile;
+			std::ofstream csvFile;
 			csvFile.open("myCSV/steering.csv");
 	        while (od4.isRunning()) {
 				
@@ -160,7 +160,7 @@ int32_t main(int32_t argc, char **argv) {
 
                 //Calculate the Steering Angle 
 				std::string timestamp;
-				timestamp += std::to_string(seconds + (microseconds/1000000));
+				timestamp += std::to_string((double)seconds + ((double)microseconds/1000000));
 
                 STEERING_TO_APPLY= steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
                 std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
