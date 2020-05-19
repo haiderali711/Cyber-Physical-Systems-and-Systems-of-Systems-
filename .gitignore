@@ -69,3 +69,6 @@ _deps
 *.exe
 *.out
 *.app
+
+# CSV files
+*.csv
