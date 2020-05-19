@@ -26,6 +26,9 @@
 #include <sys/time.h>
 #include "ConeDetection.hpp"
 #include "SteeringCalculator.hpp"
+#include <iostream>
+#include <fstream>
+#include <string>
 
 /************************************
 *************VERY IMPORTANT**********
@@ -33,6 +36,7 @@
 ************************************/
 int BLUE_IS_LEFT = 1; //the blue cone are Not on the left side -> default
 double STEERING_TO_APPLY;
+int seconds, microseconds;
 
 //*****************MAIN**********************
  
@@ -105,6 +109,8 @@ int32_t main(int32_t argc, char **argv) {
             sharedMemory->unlock();
 
 	        // Endless loop; end the program by pressing Ctrl-C.
+			fstream::ofstream csvFile;
+			csvFile.open("myCSV/steering.csv");
 	        while (od4.isRunning()) {
 				
 	        	start_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
@@ -129,13 +135,16 @@ int32_t main(int32_t argc, char **argv) {
                     }     
 	            }
 
-
 	            // Lock the shared memory.
 	            sharedMemory->lock();
 	            {
 	                // Copy the pixels from the shared memory into our own data structure.
 	                cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
 	                img = wrapped.clone();
+
+					seconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).seconds();
+                    microseconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).microseconds();
+
 	            }
 	            // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
 	            sharedMemory->unlock();
@@ -149,12 +158,17 @@ int32_t main(int32_t argc, char **argv) {
                 cv::rectangle(img, cv::Point(2, 252), cv::Point(318, 358), cv::Scalar(0,255,0), 4);
                 cv::rectangle(img, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
 
-
                 //Calculate the Steering Angle 
+				std::string timestamp;
+				timestamp += std::to_string(seconds + (microseconds/1000000));
 
                 STEERING_TO_APPLY= steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
                 std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
 
+				csvFile << std::to_string(STEERING_TO_APPLY);
+				csvFile << ",";
+				csvFile << timestamp;
+				csvFile << "\n";
 
                 std::string overlay;
 
@@ -168,10 +182,6 @@ int32_t main(int32_t argc, char **argv) {
 
                 cv::putText(img, overlay, cv::Point(20, 20), 1, 1,  cv::Scalar(255,255,255));
 
-
-
-
-
 	            // Display image on your screen.
 	            if (VERBOSE) {
 	                cv::imshow(sharedMemory->name().c_str(), img);
@@ -184,9 +194,9 @@ int32_t main(int32_t argc, char **argv) {
 
                     cv::waitKey(1);
                 }
-
-
             }
+			csvFile.close();
+			return 0;
         }
         retCode = 0;
     }
