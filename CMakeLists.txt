@@ -101,11 +101,18 @@ target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 
 enable_testing()
 add_executable(${PROJECT_NAME}-Runner 
-		${CMAKE_CURRENT_SOURCE_DIR}/Tests/Tests.cpp 
+		${CMAKE_CURRENT_SOURCE_DIR}/Tests/TestConeDetection.cpp 
 		${CMAKE_CURRENT_SOURCE_DIR}/src/SteeringCalculator.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/src/ConeDetection.cpp)
 target_link_libraries(${PROJECT_NAME}-Runner ${LIBRARIES})
 add_test(NAME ${PROJECT_NAME}-Runner COMMAND ${PROJECT_NAME}-Runner)
+
+add_executable(${PROJECT_NAME}t2-Runner 
+        ${CMAKE_CURRENT_SOURCE_DIR}/Tests/TestSteeringCalc.cpp 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/SteeringCalculator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ConeDetection.cpp)
+target_link_libraries(${PROJECT_NAME}t2-Runner ${LIBRARIES})
+add_test(NAME ${PROJECT_NAME}t2-Runner COMMAND ${PROJECT_NAME}-Runner)
 
 
 # Add dependency to OpenDLV Standard Message Set.
@@ -115,3 +122,5 @@ add_dependencies(${PROJECT_NAME} generate_opendlv_standard_message_set_hpp)
 ################################################################################
 # Install executable.
 install(TARGETS ${PROJECT_NAME} DESTINATION bin COMPONENT ${PROJECT_NAME})
+
+
