@@ -145,4 +145,3 @@ int ConeDetection::decideCones (cv::Mat img) {
         return -1;
     }
 }
-*/
