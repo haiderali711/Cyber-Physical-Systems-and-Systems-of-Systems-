@@ -126,7 +126,7 @@ int ConeDetection::decideSideCones (cv::Mat img, int BLUE_IS_LEFT) {
     if (checkConePresence(left) && checkConePresence(right)) {
         BLUE_IS_LEFT = BLUE_IS_LEFT * -1;
     }
-
+    return BLUE_IS_LEFT;
 }
 
 int ConeDetection::decideCones (cv::Mat img) {
