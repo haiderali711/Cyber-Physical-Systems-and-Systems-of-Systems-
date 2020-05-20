@@ -149,7 +149,7 @@ int32_t main(int32_t argc, char **argv) {
 
 
                 // TODO: Do something with the frame.
-                //draw the red triangles for parts to discard in the main image
+                //draw the red rectangles for parts to discard in the main image
                 cv::rectangle(img, cv::Point(2, 2), cv::Point(638, 248), cv::Scalar(0,0,255),4);
                 cv::rectangle(img, cv::Point(2, 362), cv::Point(638, 478), cv::Scalar(0,0,255),4);
 
