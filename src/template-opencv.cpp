@@ -36,7 +36,6 @@
 ************************************/
 int BLUE_IS_LEFT = 1; //the blue cone are Not on the left side -> default
 double STEERING_TO_APPLY;
-int seconds, microseconds;
 
 //*****************MAIN**********************
  
@@ -72,7 +71,8 @@ int32_t main(int32_t argc, char **argv) {
 	    //time in decimals of a second
 	    gettimeofday(&tv, NULL);
 	    double start_time;
-	    
+
+
 	        // Attach to the shared memory.
 	    std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
 	    if (sharedMemory && sharedMemory->valid()) {
@@ -108,9 +108,13 @@ int32_t main(int32_t argc, char **argv) {
             // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
             sharedMemory->unlock();
 
+            double original_steering = 0.0;
+            int seconds, microseconds;
+
 	        // Endless loop; end the program by pressing Ctrl-C.
 			std::ofstream csvFile;
 			csvFile.open("myCSV/steering.csv");
+            csvFile << "calculated steering, timestamp, original steering\n";
 	        while (od4.isRunning()) {
 				
 	        	start_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
@@ -144,6 +148,7 @@ int32_t main(int32_t argc, char **argv) {
 
 					seconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).seconds();
                     microseconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).microseconds();
+                    original_steering = gsr.groundSteering();
 
 	            }
 	            // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
@@ -168,6 +173,8 @@ int32_t main(int32_t argc, char **argv) {
 				csvFile << std::to_string(STEERING_TO_APPLY);
 				csvFile << ",";
 				csvFile << timestamp;
+                csvFile << ",";
+                csvFile << original_steering;
 				csvFile << "\n";
 
                 std::string overlay;
