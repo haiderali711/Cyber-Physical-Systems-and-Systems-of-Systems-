@@ -10,7 +10,7 @@ class ConeDetection {
     	cv::Mat applyGammaCorrection (cv::Mat img);
 		  cv::Mat applyBlueFilter (cv::Mat img);
 		  cv::Mat applyYellowFilter (cv::Mat img);
-      int decideSideCones (cv::Mat img,int BLUE_IS_LEFT);
-    	int decideSideCone (cv::Mat img);
+      int decideSideCones (cv::Mat img, int BLUE_IS_LEFT);
+      int decideCones (cv::Mat img);
 };
 #endif

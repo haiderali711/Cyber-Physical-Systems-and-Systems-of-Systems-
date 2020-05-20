@@ -106,7 +106,7 @@ cv::Mat ConeDetection::applyYellowFilter (cv::Mat img) {
 /********************************************
 ****************SIDE CHECKING FUNCTION*******
 ********************************************/
-int ConeDetection::decideSideCones (cv::Mat img,int BLUE_IS_LEFT) {
+int ConeDetection::decideSideCones (cv::Mat img, int BLUE_IS_LEFT) {
     cv::Mat left,right;
 
     //apply filters the other way around
@@ -129,7 +129,7 @@ int ConeDetection::decideSideCones (cv::Mat img,int BLUE_IS_LEFT) {
 
 }
 
-int ConeDetection::decideSideCone (cv::Mat img) {
+int ConeDetection::decideCones (cv::Mat img) {
     cv::Mat left,right;
 
     right = applyBlueFilter(img);
