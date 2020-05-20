@@ -48,17 +48,17 @@ cv::Mat ConeDetection::applyGammaCorrection (cv::Mat img){
 
 cv::Mat ConeDetection::applyBlueFilter (cv::Mat img) {
     //set HSV values for blue cones
-    int lowH = 105;
-    int highH = 140;
-    int lowS = 42;
-    int highS = 107;
-    int lowV = 107;
-    int highV = 163;
+    int lowH = 108;
+    int highH = 128;
+    int lowS = 108;
+    int highS = 255;
+    int lowV = 10;
+    int highV = 255;
 
     cv::Mat blue_cones;   // Thresh Image
     cv::Mat hsvImg;
 
-    cv::Mat gamma_corrected = applyGammaCorrection(img);
+    cv::Mat gamma_corrected = img;
 
     // convert the gamma corrected image to HSV
     cv::cvtColor(gamma_corrected, hsvImg, CV_BGR2HSV);
@@ -79,10 +79,10 @@ cv::Mat ConeDetection::applyYellowFilter (cv::Mat img) {
 
     //set HSV values for yellow cones
     int lowH2 = 20;
-    int highH2 = 30;
+    int highH2 = 35;
     int lowS2 = 100;
-    int highS2 = 255;
-    int lowV2 = 100;
+    int highS2 = 230;
+    int lowV2 = 115;
     int highV2 = 255;
 
     cv::Mat yellow_cones; // Tresh Image
