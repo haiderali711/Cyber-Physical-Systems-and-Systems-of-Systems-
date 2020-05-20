@@ -23,9 +23,27 @@ with open('myCSV/steering.csv', 'r') as csvfile:
 		else:
 			i-=1
 
+	i = 0
+	total = len(angle)
+	
+
+	
+	n_acceptable = 0
+	for i in range(total):
+		if angle[i] <= original[i] + original[i]*0.5 and angle[i] >= original[i] - original[i]*0.5:
+			n_acceptable+=1
+	print("Acceptability percentage: " + str(n_acceptable/total*100));
+	if n_acceptable/total*100>=20: 
+		print("Acceptable")
+	else:
+		print("NOT Acceptable")
+
+
+
+
 
 graph.plot(timestamp, original, label='Original angle over time',color="blue")
-graph.plot(timestamp, angle, label='Calculated angle over time',color="magenta")
+graph.plot(timestamp, angle, label='Calculated angle over time',color="black")
 graph.xlabel('timestamp')
 graph.ylabel('angle')
 graph.title('Steering Wheel Angle')

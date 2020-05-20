@@ -115,29 +115,26 @@ int32_t main(int32_t argc, char **argv) {
 			std::ofstream csvFile;
 			csvFile.open("myCSV/steering.csv");
             csvFile << "calculated steering, timestamp, original steering\n";
+
+            start_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
+
 	        while (od4.isRunning()) {
-				
-	        	start_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
 
 
 	            // Wait for a notification of a new frame.
+                
 	            sharedMemory->wait();
-
-				//calculate current time
-	            gettimeofday(&tv, NULL);
+                
+                //calculate current time
+                gettimeofday(&tv, NULL);
                 double current_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
-
                 //Decide whether the cones on the left are blue or yellow
-                if ((int)(current_time - start_time) % 5 == 0) {
-                    BLUE_IS_LEFT = coneDetection.decideSideCones(img, BLUE_IS_LEFT);
+                if ((int)(current_time - start_time) %5 ==0) {
+                    std::cout<<std::endl<<"change BLUE_IS_LEFT "<<BLUE_IS_LEFT;
+                    BLUE_IS_LEFT = coneDetection.decideSideCones(img, BLUE_IS_LEFT);    
+                }
 
-                    if (BLUE_IS_LEFT==1){
-	                   	std::cout << std::endl <<"Left : BLUE  || right : YELLOW"<< std::endl;
-                    }  
-                    if (BLUE_IS_LEFT==-1){
-                       	std::cout << std::endl <<"Left : YELLOW  || right : BLUE"<< std::endl;
-                    }     
-	            }
+				
 
 	            // Lock the shared memory.
 	            sharedMemory->lock();
@@ -154,6 +151,7 @@ int32_t main(int32_t argc, char **argv) {
 	            // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
 	            sharedMemory->unlock();
 
+                
                 // TODO: Do something with the frame.
                 //draw the red triangles for parts to discard in the main image
                 cv::rectangle(img, cv::Point(2, 2), cv::Point(638, 248), cv::Scalar(0,0,255),4);
