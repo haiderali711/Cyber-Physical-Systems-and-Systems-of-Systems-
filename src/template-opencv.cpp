@@ -189,7 +189,7 @@ int32_t main(int32_t argc, char **argv) {
                 cv::putText(img, overlay, cv::Point(20, 20), 1, 1,  cv::Scalar(255,255,255));
 
                 jsonO = "";
-                jsonO += "{ \"counter\" :\""+std::to_string(unitsPerCalculation)+"\", \"Original\":\""+OSteering+"\",\"OurSteering\" : \""+std::to_string(STEERING_TO_APPLY)+"\""+"}"; 
+                jsonO += "{ \"Timestamp\" :\""+timestamp+"\", \"Original\":\""+OSteering+"\",\"OurSteering\" : \""+std::to_string(STEERING_TO_APPLY)+"\""+"}";
                 cluon::UDPSender sender("127.0.0.1", 1234);
                 sender.send(std::move(jsonO));
                 //std::cout << std::endl << jsonO;

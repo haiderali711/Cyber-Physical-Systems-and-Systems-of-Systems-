@@ -24,7 +24,7 @@ bool ConeDetection::checkConePresence (cv::Mat croppedImage) {
     }
     int total_pixels = (croppedImage.rows)*croppedImage.cols;
     double white_percentage = (double)(amount * 100) / total_pixels;
-    
+
     if (white_percentage > HAS_CONES_THRESHHOLD) {
         return true;
     }
@@ -32,7 +32,7 @@ bool ConeDetection::checkConePresence (cv::Mat croppedImage) {
 }
 
 cv::Mat ConeDetection::applyGammaCorrection (cv::Mat img){
-    // Apply gamma color correction by factor 0.4 
+    // Apply gamma color correction by factor 0.4
     double gamma_ = 0.4;
     cv::Mat lookUpTable(1, 256, CV_8U);
     uchar* p = lookUpTable.ptr();
@@ -93,8 +93,8 @@ cv::Mat ConeDetection::applyYellowFilter (cv::Mat img) {
 
     // Apply HSV filter
     cv::inRange(hsvImg, cv::Scalar(lowH2, lowS2, lowV2), cv::Scalar(highH2, highS2, highV2), yellow_cones);
-    
-    // Erosion         
+
+    // Erosion
     cv::erode(yellow_cones, yellow_cones, erosion_kernel);
 
     // Dilation
@@ -106,9 +106,9 @@ cv::Mat ConeDetection::applyYellowFilter (cv::Mat img) {
 /********************************************
 ****************SIDE CHECKING FUNCTION*******
 ********************************************/
-int ConeDetection::decideSideCones (cv::Mat img) {
+int ConeDetection::decideSideCones (cv::Mat img,int BLUE_IS_LEFT) {
     cv::Mat left,right;
-    /*
+
     //apply filters the other way around
     if (BLUE_IS_LEFT == 1) {
         right = applyBlueFilter(img);
@@ -116,21 +116,28 @@ int ConeDetection::decideSideCones (cv::Mat img) {
     } else {
         left = applyBlueFilter(img);
         right = applyYellowFilter(img);
-    }*/
-    
-    right = applyBlueFilter(img);
-    left = applyBlueFilter(img);
-
-
+    }
     //crop image
     left(cv::Rect(0,250,320,110)).copyTo(left);
     right(cv::Rect(320,250,320,110)).copyTo(right);
 
     //if the filters applied the other way detect cones then it means that
     //the variables indicating in which side the blue cones are has to be switched
-    /*if (checkConePresence(left) && checkConePresence(right)) {
+    if (checkConePresence(left) && checkConePresence(right)) {
         BLUE_IS_LEFT = BLUE_IS_LEFT * -1;
-    }*/
+    }
+
+}
+
+int ConeDetection::decideSideCone (cv::Mat img) {
+    cv::Mat left,right;
+
+    right = applyBlueFilter(img);
+    left = applyBlueFilter(img);
+
+    //crop image
+    left(cv::Rect(0,250,320,110)).copyTo(left);
+    right(cv::Rect(320,250,320,110)).copyTo(right);
 
     if (checkConePresence(left)){
         return 1;
@@ -138,3 +145,4 @@ int ConeDetection::decideSideCones (cv::Mat img) {
         return -1;
     }
 }
+*/
