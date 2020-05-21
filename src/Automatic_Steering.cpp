@@ -65,14 +65,6 @@ int32_t main(int32_t argc, char **argv) {
 	    const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
 	    const bool VERBOSE{commandlineArguments.count("verbose") != 0};
 
-
-		//needed for gettinng current time
-	    struct timeval  tv;
-	    //time in decimals of a second
-	    gettimeofday(&tv, NULL);
-	    double start_time;
-
-
 	        // Attach to the shared memory.
 	    std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
 	    if (sharedMemory && sharedMemory->valid()) {
@@ -116,20 +108,35 @@ int32_t main(int32_t argc, char **argv) {
 			    csvFile.open("myCSV/steering.csv");
           csvFile << "calculated steering, timestamp, original steering\n";
 
-          start_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
 
+          //needed for gettinng current time
+          struct timeval  tv;
+          //time in decimals of a second
+          gettimeofday(&tv, NULL);
+          double start_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
+          double video_start_time = 0, before_frame_time = 0;
+          bool beginning = true;
 	        while (od4.isRunning()) {
 
+	        		gettimeofday(&tv, NULL);
+          		before_frame_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
 
 	            // Wait for a notification of a new frame.
-
 	            sharedMemory->wait();
 
-                //calculate current time
-                gettimeofday(&tv, NULL);
-                double current_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
+							//calculate current time
+              gettimeofday(&tv, NULL);
+              double current_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
+
+	            if(beginning || current_time - before_frame_time > 15){
+	            	gettimeofday(&tv, NULL);
+          			video_start_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
+          			beginning = false;
+          		}
+
+                
                 //Decide whether the cones on the left are blue or yellow
-                if ((int)(current_time - start_time) %5 ==0) {
+                if ((int)(current_time - start_time) %5 ==0 && current_time-video_start_time < 40) {
                     std::cout<<std::endl<<"change BLUE_IS_LEFT "<<BLUE_IS_LEFT;
                     BLUE_IS_LEFT = coneDetection.decideSideCones(img, BLUE_IS_LEFT);
                 }
@@ -166,13 +173,13 @@ int32_t main(int32_t argc, char **argv) {
 
                 STEERING_TO_APPLY= steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
                 
-				std::cout << std::endl << "group_01;" << timestamp << ";" << STEERING_TO_APPLY;
+				        std::cout << std::endl << "group_01;" << timestamp << ";" << STEERING_TO_APPLY;
 						
-                		csvFile << std::to_string(STEERING_TO_APPLY);
-						csvFile << ",";
+                csvFile << std::to_string(STEERING_TO_APPLY);
+						    csvFile << ",";
 				        csvFile << timestamp;
-                		csvFile << ",";
-                		csvFile << original_steering;
+                csvFile << ",";
+                csvFile << original_steering;
 				        csvFile << "\n";
 
                 std::string overlay;
