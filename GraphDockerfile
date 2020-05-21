@@ -8,15 +8,15 @@ RUN apt-get update -y && \
     apt-get dist-upgrade -y
 
 RUN apt-get install -y --no-install-recommends python3 python3-pip && \
-	pip3 install --upgrade setuptools && sudo apt-get install python3-matplotlib && \
+	pip3 install --upgrade setuptools && \
 	pip3 install pandas && \
 	apt-get install python3-matplotlib -y
 
 
-ADD . /opt/sources
+ADD ./src/liveGraph.py &&\ 
+./opt/sources
 WORKDIR /opt/sources
 
 RUN cd /opt/sources 
 
 ENTRYPOINT [ "python3","./liveGraph.py" ]
-
