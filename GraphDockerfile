@@ -1,0 +1,22 @@
+##################################################
+# Section 1: Build the application
+FROM ubuntu:18.04 as builder
+MAINTAINER Group 01 ali.haider7111@gmail.com
+
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get dist-upgrade -y
+
+RUN apt-get install -y --no-install-recommends python3 python3-pip && \
+	pip3 install --upgrade setuptools && sudo apt-get install python3-matplotlib && \
+	pip3 install pandas && \
+	apt-get install python3-matplotlib -y
+
+
+ADD . /opt/sources
+WORKDIR /opt/sources
+
+RUN cd /opt/sources 
+
+ENTRYPOINT [ "python3","./liveGraph.py" ]
+
