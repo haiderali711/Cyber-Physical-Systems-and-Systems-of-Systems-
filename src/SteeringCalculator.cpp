@@ -6,8 +6,8 @@
 //declaration of Variables related Image segmentation and color detection
 int SEGMENTS = 10;
 double STEERING_LIMIT = 0.290888;
-double STEERING_UNIT = STEERING_LIMIT / SEGMENTS;
 double STEERING_ANGLE= 0.00;
+double CONSTANT = STEERING_LIMIT / sin(1);
 
 
 
@@ -76,7 +76,7 @@ double SteeringCalculator::calculateSteering (cv::Mat img, int BLUE_IS_LEFT) {
 	       else{
     int delta = countRight - countLeft;
     //STEERING_ANGLE = delta*STEERING_UNIT;
-    STEERING_ANGLE = (double)sin(delta*delta*delta*delta*delta/100000.0)*0.345689876; 
+    STEERING_ANGLE = (double)sin((double)(delta*delta*delta*delta*delta)/(SEGMENTS*SEGMENTS*SEGMENTS*SEGMENTS*SEGMENTS))*CONSTANT; 
 	}
 
     return STEERING_ANGLE;
