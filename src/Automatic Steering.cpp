@@ -165,13 +165,12 @@ int32_t main(int32_t argc, char **argv) {
 				        timestamp += std::to_string((double)seconds + ((double)microseconds/1000000));
 
                 STEERING_TO_APPLY= steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
-                std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
+                
+				std::cout << std::endl << "group_01;" << timestamp << ";" << STEERING_TO_APPLY;
 
-				        csvFile << std::to_string(STEERING_TO_APPLY);
-				        csvFile << ",";
 				        csvFile << timestamp;
-                csvFile << ",";
-                csvFile << original_steering;
+                		csvFile << ",";
+                		csvFile << std::to_string(STEERING_TO_APPLY);
 				        csvFile << "\n";
 
                 std::string overlay;
