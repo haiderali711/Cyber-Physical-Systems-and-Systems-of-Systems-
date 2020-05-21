@@ -58,4 +58,4 @@ RUN apt-get install -y --no-install-recommends \
 WORKDIR /usr/bin
 COPY --from=builder /tmp/bin/template-opencv .
 # This is the entrypoint when starting the Docker container; hence, this Docker image is automatically starting our software on its creation
-ENTRYPOINT ["/usr/bin/template-opencv"]
+ENTRYPOINT ["/usr/bin/Automatic_Steering"]
