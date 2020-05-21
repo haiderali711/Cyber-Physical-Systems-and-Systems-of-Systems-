@@ -11,12 +11,12 @@ ConeDetection cd;
 cv::Mat image;
 
 
-TEST_CASE("Blue on left","[test1]") {
+TEST_CASE("Blue on left or right","[test1]") {
 	image = cv::imread("../MD_Material/img3.jpg", -1);	
-	REQUIRE(cd.decideSideCones(image) == 1);
+	REQUIRE(cd.decideSideCones(image, 1) == 1);
 
-	image = cv::imread("../MD_Material/img3-M.jpg", -1);	
-	REQUIRE(cd.decideSideCones(image) == -1);
+	image = cv::imread("../MD_Material/img3-M2.jpg", -1);	
+	REQUIRE(cd.decideSideCones(image,-1) == -1);
 }
 
 

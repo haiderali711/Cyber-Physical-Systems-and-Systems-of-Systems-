@@ -1,5 +1,6 @@
 #include "SteeringCalculator.hpp"
 #include "ConeDetection.hpp"
+#include <iostream>
 
 
 //declaration of Variables related Image segmentation and color detection
@@ -69,12 +70,13 @@ double SteeringCalculator::calculateSteering (cv::Mat img, int BLUE_IS_LEFT) {
         if (rightBooleans[i] && countRight==0)  countRight = SEGMENTS - i;
         if (leftBooleans[i] && countLeft==0)  countLeft = SEGMENTS - i;
     }
-    //std::cout << std::endl << countLeft << " " << countRight;
+    std::cout << std::endl << countLeft << " " << countRight;
 	if(countLeft==0 && countRight==0){}
-	else {
+        else if (abs(countLeft-countRight)<=3) {STEERING_ANGLE=0;}
+	       else{
     int delta = countRight - countLeft;
-
-    STEERING_ANGLE = delta * STEERING_UNIT; 
+    //STEERING_ANGLE = delta*STEERING_UNIT;
+    STEERING_ANGLE = (double)sin(delta*delta*delta*delta*delta/100000.0)*0.345689876; 
 	}
 
     return STEERING_ANGLE;

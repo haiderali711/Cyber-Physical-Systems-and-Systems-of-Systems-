@@ -26,6 +26,9 @@
 #include <sys/time.h>
 #include "ConeDetection.hpp"
 #include "SteeringCalculator.hpp"
+#include <iostream>
+#include <fstream>
+#include <string>
 
 /************************************
 *************VERY IMPORTANT**********
@@ -35,7 +38,7 @@ int BLUE_IS_LEFT = 1; //the blue cone are Not on the left side -> default
 double STEERING_TO_APPLY;
 
 //*****************MAIN**********************
- 
+
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
     ConeDetection coneDetection;
@@ -61,14 +64,15 @@ int32_t main(int32_t argc, char **argv) {
 	    const uint32_t WIDTH{static_cast<uint32_t>(std::stoi(commandlineArguments["width"]))};
 	    const uint32_t HEIGHT{static_cast<uint32_t>(std::stoi(commandlineArguments["height"]))};
 	    const bool VERBOSE{commandlineArguments.count("verbose") != 0};
-		
+
 
 		//needed for gettinng current time
 	    struct timeval  tv;
 	    //time in decimals of a second
 	    gettimeofday(&tv, NULL);
 	    double start_time;
-	    
+
+
 	        // Attach to the shared memory.
 	    std::unique_ptr<cluon::SharedMemory> sharedMemory{new cluon::SharedMemory{NAME}};
 	    if (sharedMemory && sharedMemory->valid()) {
@@ -92,60 +96,59 @@ int32_t main(int32_t argc, char **argv) {
 
 	        cv::Mat img;
 	        // Wait for a notification of a new frame.
-            sharedMemory->wait();
+          sharedMemory->wait();
 
-            // Lock the shared memory.
-            sharedMemory->lock();
-            {
-                // Copy the pixels from the shared memory into our own data structure.
-                cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
-                img = wrapped.clone();
-            }
-            // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
-            sharedMemory->unlock();
+          // Lock the shared memory.
+          sharedMemory->lock();
+          {
+              // Copy the pixels from the shared memory into our own data structure.
+              cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
+              img = wrapped.clone();
+          }
+          // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
+          sharedMemory->unlock();
 
-            int unitsPerCalculation=0;
-	        // Endless loop; end the program by pressing Ctrl-C.
+          double original_steering = 0.0;
+          int seconds, microseconds;
+
+	         // Endless loop; end the program by pressing Ctrl-C.
+			    std::ofstream csvFile;
+			    csvFile.open("myCSV/steering.csv");
+          csvFile << "calculated steering, timestamp, original steering\n";
+
+          start_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
+
 	        while (od4.isRunning()) {
-				
-	        	start_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
 
 
 	            // Wait for a notification of a new frame.
+
 	            sharedMemory->wait();
+
+                //calculate current time
+                gettimeofday(&tv, NULL);
+                double current_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
+                //Decide whether the cones on the left are blue or yellow
+                if ((int)(current_time - start_time) %5 ==0) {
+                    std::cout<<std::endl<<"change BLUE_IS_LEFT "<<BLUE_IS_LEFT;
+                    BLUE_IS_LEFT = coneDetection.decideSideCones(img, BLUE_IS_LEFT);
+                }
+
+
 
 	            // Lock the shared memory.
 	            sharedMemory->lock();
 	            {
-	                // Copy the pixels from the shared memory into our own data structure.
+                  // Copy the pixels from the shared memory into our own data structure.
 	                cv::Mat wrapped(HEIGHT, WIDTH, CV_8UC4, sharedMemory->data());
 	                img = wrapped.clone();
+
+					        seconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).seconds();
+                  microseconds = std::get<cluon::data::TimeStamp>(sharedMemory->getTimeStamp()).microseconds();
+                  original_steering = gsr.groundSteering();
 	            }
 	            // TODO: Here, you can add some code to check the sampleTimePoint when the current frame was captured.
 	            sharedMemory->unlock();
-
-
-	            //calculate current time
-	            gettimeofday(&tv, NULL);
-                double current_time = (tv.tv_sec)*10 + (tv.tv_usec) / 100000;
-
-                //Decide whether the cones on the left are blue or yellow
-                if ((int)(current_time - start_time) % 10 == 0) {
-                    BLUE_IS_LEFT = coneDetection.decideSideCones(img);
-
-                    if (BLUE_IS_LEFT==1){
-	                   	std::cout << std::endl <<"Left : BLUE  || right : YELLOW"<< std::endl;
-                    }  
-                    if (BLUE_IS_LEFT==-1){
-                       	std::cout << std::endl <<"Left : YELLOW  || right : BLUE"<< std::endl;
-                    }     
-	            }
-
-
-                //Calculate the Steering Angle 
-
-                STEERING_TO_APPLY= steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
-                std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
 
 
                 // TODO: Do something with the frame.
@@ -157,28 +160,40 @@ int32_t main(int32_t argc, char **argv) {
                 cv::rectangle(img, cv::Point(2, 252), cv::Point(318, 358), cv::Scalar(0,255,0), 4);
                 cv::rectangle(img, cv::Point(322, 252), cv::Point(638, 358), cv::Scalar(0,255,0), 4);
 
+                //Calculate the Steering Angle
+				        std::string timestamp;
+				        timestamp += std::to_string((double)seconds + ((double)microseconds/1000000));
 
-                //creating Json to push as a UDP message
+                STEERING_TO_APPLY= steeringCalculator.calculateSteering(img,BLUE_IS_LEFT);
+                std::cout << std::endl << "STEERING: "<<STEERING_TO_APPLY;
+
+				        csvFile << std::to_string(STEERING_TO_APPLY);
+				        csvFile << ",";
+				        csvFile << timestamp;
+                csvFile << ",";
+                csvFile << original_steering;
+				        csvFile << "\n";
 
                 std::string overlay;
-
-				{
+                std::string jsonO;
+                std::string OSteering;
+				        {
                     std::lock_guard<std::mutex> lck(gsrMutex);
-					overlay += "Original: ";
-                	overlay += std::to_string(gsr.groundSteering());
-                	overlay += "   ||   Our : ";
-                	overlay += std::to_string(STEERING_TO_APPLY);
+                    OSteering = std::to_string(gsr.groundSteering());
+					          overlay += "Original: ";
+                	  overlay += OSteering;
+                	  overlay += "   ||   Our : ";
+                	  overlay += std::to_string(STEERING_TO_APPLY);
                 }
 
                 cv::putText(img, overlay, cv::Point(20, 20), 1, 1,  cv::Scalar(255,255,255));
 
-
-                unitsPerCalculation++;
-                overlay = "";
-                overlay += "{ \"counter\" :\""+std::to_string(unitsPerCalculation)+"\", \"Original\":\""+std::to_string(gsr.groundSteering())+"\",\"OurSteering\" : \""+std::to_string(STEERING_TO_APPLY)+"\""+"}"; 
+                jsonO = "";
+                jsonO += "{ \"Timestamp\" :\""+timestamp+"\", \"Original\":\""+OSteering+"\",\"OurSteering\" : \""+std::to_string(STEERING_TO_APPLY)+"\""+"}";
                 cluon::UDPSender sender("127.0.0.1", 1234);
-                sender.send(std::move(overlay));
-                std::cout << std::endl << overlay;
+                sender.send(std::move(jsonO));
+                //std::cout << std::endl << jsonO;
+
 
 
 
@@ -188,18 +203,17 @@ int32_t main(int32_t argc, char **argv) {
 
                     //cv::imshow("b_cones", blue_cones);
                     //cv::imshow("y_cones", yellow_cones);
-                    
+
                     //cv::imshow("conesL", leftImg);
                     //cv::imshow("conesR", rightImg);
 
                     cv::waitKey(1);
                 }
-
-
             }
+			csvFile.close();
+			return 0;
         }
         retCode = 0;
     }
     return retCode;
 }
-

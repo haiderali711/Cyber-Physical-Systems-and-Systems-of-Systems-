@@ -24,7 +24,7 @@ bool ConeDetection::checkConePresence (cv::Mat croppedImage) {
     }
     int total_pixels = (croppedImage.rows)*croppedImage.cols;
     double white_percentage = (double)(amount * 100) / total_pixels;
-    
+
     if (white_percentage > HAS_CONES_THRESHHOLD) {
         return true;
     }
@@ -32,7 +32,7 @@ bool ConeDetection::checkConePresence (cv::Mat croppedImage) {
 }
 
 cv::Mat ConeDetection::applyGammaCorrection (cv::Mat img){
-    // Apply gamma color correction by factor 0.4 
+    // Apply gamma color correction by factor 0.4
     double gamma_ = 0.4;
     cv::Mat lookUpTable(1, 256, CV_8U);
     uchar* p = lookUpTable.ptr();
@@ -48,17 +48,17 @@ cv::Mat ConeDetection::applyGammaCorrection (cv::Mat img){
 
 cv::Mat ConeDetection::applyBlueFilter (cv::Mat img) {
     //set HSV values for blue cones
-    int lowH = 105;
-    int highH = 140;
-    int lowS = 42;
-    int highS = 107;
-    int lowV = 107;
-    int highV = 163;
+    int lowH = 108;
+    int highH = 128;
+    int lowS = 108;
+    int highS = 255;
+    int lowV = 10;
+    int highV = 255;
 
     cv::Mat blue_cones;   // Thresh Image
     cv::Mat hsvImg;
 
-    cv::Mat gamma_corrected = applyGammaCorrection(img);
+    cv::Mat gamma_corrected = img;
 
     // convert the gamma corrected image to HSV
     cv::cvtColor(gamma_corrected, hsvImg, CV_BGR2HSV);
@@ -79,10 +79,10 @@ cv::Mat ConeDetection::applyYellowFilter (cv::Mat img) {
 
     //set HSV values for yellow cones
     int lowH2 = 20;
-    int highH2 = 30;
+    int highH2 = 35;
     int lowS2 = 100;
-    int highS2 = 255;
-    int lowV2 = 100;
+    int highS2 = 230;
+    int lowV2 = 115;
     int highV2 = 255;
 
     cv::Mat yellow_cones; // Tresh Image
@@ -93,8 +93,8 @@ cv::Mat ConeDetection::applyYellowFilter (cv::Mat img) {
 
     // Apply HSV filter
     cv::inRange(hsvImg, cv::Scalar(lowH2, lowS2, lowV2), cv::Scalar(highH2, highS2, highV2), yellow_cones);
-    
-    // Erosion         
+
+    // Erosion
     cv::erode(yellow_cones, yellow_cones, erosion_kernel);
 
     // Dilation
@@ -106,9 +106,9 @@ cv::Mat ConeDetection::applyYellowFilter (cv::Mat img) {
 /********************************************
 ****************SIDE CHECKING FUNCTION*******
 ********************************************/
-int ConeDetection::decideSideCones (cv::Mat img) {
+int ConeDetection::decideSideCones (cv::Mat img, int BLUE_IS_LEFT) {
     cv::Mat left,right;
-    /*
+
     //apply filters the other way around
     if (BLUE_IS_LEFT == 1) {
         right = applyBlueFilter(img);
@@ -116,21 +116,28 @@ int ConeDetection::decideSideCones (cv::Mat img) {
     } else {
         left = applyBlueFilter(img);
         right = applyYellowFilter(img);
-    }*/
-    
-    right = applyBlueFilter(img);
-    left = applyBlueFilter(img);
-
-
+    }
     //crop image
     left(cv::Rect(0,250,320,110)).copyTo(left);
     right(cv::Rect(320,250,320,110)).copyTo(right);
 
     //if the filters applied the other way detect cones then it means that
     //the variables indicating in which side the blue cones are has to be switched
-    /*if (checkConePresence(left) && checkConePresence(right)) {
+    if (checkConePresence(left) && checkConePresence(right)) {
         BLUE_IS_LEFT = BLUE_IS_LEFT * -1;
-    }*/
+    }
+    return BLUE_IS_LEFT;
+}
+
+int ConeDetection::decideCones (cv::Mat img) {
+    cv::Mat left,right;
+
+    right = applyBlueFilter(img);
+    left = applyBlueFilter(img);
+
+    //crop image
+    left(cv::Rect(0,250,320,110)).copyTo(left);
+    right(cv::Rect(320,250,320,110)).copyTo(right);
 
     if (checkConePresence(left)){
         return 1;
