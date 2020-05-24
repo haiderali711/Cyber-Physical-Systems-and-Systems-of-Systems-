@@ -50,9 +50,9 @@
 
     -   docker build https://github.com/chalmers-revere/opendlv-video-h264-decoder.git#v0.0.3 -f Dockerfile.amd64 -t h264decoder:v0.0.3
 
-    -   docker build -t <TagName for your Steering Microservice>:latest -f Dockerfile .
+    -   docker build -t auto-steering:latest -f Dockerfile .
 
-    -   docker build -t <TagName for your Grapher>:latest -f GraphDockerfile .
+    -   docker build -t pyhtongraph:latest -f GraphDockerfile .
     ```
 
     ```bash
@@ -101,9 +101,9 @@
 
     #	ONE OF COMMANDS IN THE TERMINAL WONT WORK SINCE THERE IS NO SHARED MEMORY INTIALIAZED UNTIL THE FIRST VIDEO HAS STARTED, SO AFTER STARTING THE FIRST VIDEO RUN THIS COMMAND
 
--	xhost +
+    -	xhost +
 	
-	docker run --rm -ti --net=host --ipc=host -v /tmp:/tmp auto-steering:latest --cid=253 --name=img --width=640 --height=480
+	    docker run --rm -ti --net=host --ipc=host -v /tmp:/tmp auto-steering:latest --cid=253 --name=img --width=640 --height=480
 
     ```
 
