@@ -86,7 +86,9 @@
     -   docker run --rm -ti --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp pyhtongraph --cid=253
 
     # FOURTH TERMINAL
-    -   docker run --rm -ti --net=host --ipc=host -e DISPLAY=$DISPLAY -v /tmp:/tmp auto-steering:latest --cid=253 --name=img --width=640 --height=480 --verbose
+    -   xhost +
+	
+	docker run --rm -ti --net=host --ipc=host -v /tmp:/tmp auto-steering:latest --cid=253 --name=img --width=640 --height=480
 
     ```
 
@@ -96,6 +98,12 @@
     -   chmod +x ./RunContainer.sh
 
     -   ./RunContainer.sh
+
+    #	ONE OF COMMANDS IN THE TERMINAL WONT WORK SINCE THERE IS NO SHARED MEMORY INTIALIAZED UNTIL THE FIRST VIDEO HAS STARTED, SO AFTER STARTING THE FIRST VIDEO RUN THIS COMMAND
+
+-	xhost +
+	
+	docker run --rm -ti --net=host --ipc=host -v /tmp:/tmp auto-steering:latest --cid=253 --name=img --width=640 --height=480
 
     ```
 
