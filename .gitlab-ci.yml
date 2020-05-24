@@ -28,7 +28,6 @@ variables:
   BUILDX_PLATFORM: linux/amd64,linux/arm64,linux/arm/v7
   #TEST_CMD: <some command to run on your image to (smoke-)test whether all is good>
   IMAGE: registry.git.chalmers.se/courses/dit638/students/group_01
-          registry.git.chalmers.se/courses/dit638/students/group_01
 
 services:
   - name: docker:18-dind
