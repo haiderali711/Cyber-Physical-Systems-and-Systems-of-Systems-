@@ -13,7 +13,7 @@ double CONSTANT = STEERING_LIMIT / sin(1);
 
 double SteeringCalculator::calculateSteering (cv::Mat img, int BLUE_IS_LEFT) {
     ConeDetection coneDetection;
-    cv::Mat leftImg;                //left segment with just cones 
+    cv::Mat leftImg;                //left segment with just cones
     cv::Mat rightImg;               //right segment with just cones
     cv::Mat leftArray [SEGMENTS];           //smaller segments from leftImage
     cv::Mat rightArray [SEGMENTS];          //smaller segments from rightImage
@@ -21,7 +21,7 @@ double SteeringCalculator::calculateSteering (cv::Mat img, int BLUE_IS_LEFT) {
     bool rightBooleans [SEGMENTS];          //boolean indication for cones presence
     cv::Mat hsvImg;                 // HSV image for the original frame
 
-    //*********************Image Manipulation for Color detection ****************  
+    //*********************Image Manipulation for Color detection ****************
     cv::Mat blue_cones = coneDetection.applyBlueFilter(img);
     cv::Mat yellow_cones = coneDetection.applyYellowFilter(img);
 
@@ -62,7 +62,7 @@ double SteeringCalculator::calculateSteering (cv::Mat img, int BLUE_IS_LEFT) {
     //Call to THE FUNCTION to check the presence of the cones in the segments
 
     int countLeft = 0,countRight = 0;
-                    
+
     for (int i = 0; i < SEGMENTS; ++i)
     {
         rightBooleans[i] = coneDetection.checkConePresence(rightArray[i]);
@@ -70,13 +70,13 @@ double SteeringCalculator::calculateSteering (cv::Mat img, int BLUE_IS_LEFT) {
         if (rightBooleans[i] && countRight==0)  countRight = SEGMENTS - i;
         if (leftBooleans[i] && countLeft==0)  countLeft = SEGMENTS - i;
     }
-    std::cout << std::endl << countLeft << " " << countRight;
+    //std::cout << std::endl << countLeft << " " << countRight;
 	if(countLeft==0 && countRight==0){}
         else if (abs(countLeft-countRight)<=3) {STEERING_ANGLE=0;}
 	       else{
     int delta = countRight - countLeft;
     //STEERING_ANGLE = delta*STEERING_UNIT;
-    STEERING_ANGLE = (double)sin((double)(delta*delta*delta*delta*delta)/(SEGMENTS*SEGMENTS*SEGMENTS*SEGMENTS*SEGMENTS))*CONSTANT; 
+    STEERING_ANGLE = (double)sin((double)(delta*delta*delta*delta*delta)/(SEGMENTS*SEGMENTS*SEGMENTS*SEGMENTS*SEGMENTS))*CONSTANT;
 	}
 
     return STEERING_ANGLE;
