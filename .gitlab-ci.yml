@@ -38,7 +38,7 @@ stages:
   - test
 # Display information before we start the build.
 before_script:
-  - docker buildx rm -rf ${BUILDX_BUILDER}
+  - docker buildx rm ${BUILDX_BUILDER}
   - mkdir -p $HOME/.docker/cli-plugins/
   - wget -O $HOME/.docker/cli-plugins/docker-buildx $BUILDX_URL
   - chmod a+x $HOME/.docker/cli-plugins/docker-buildx
