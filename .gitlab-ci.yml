@@ -24,7 +24,7 @@ variables:
   DOCKER_BUILDKIT: 1
   DOCKER_CLI_EXPERIMENTAL: enabled
   BUILDX_URL: https://github.com/docker/buildx/releases/download/v0.4.1/buildx-v0.4.1.linux-amd64
-  BUILDX_BUILDER: buildxBilder
+  BUILDX_BUILDER: buildxBilder1
   BUILDX_PLATFORM: linux/amd64,linux/arm64,linux/arm/v7
   #TEST_CMD: <some command to run on your image to (smoke-)test whether all is good>
   IMAGE: registry.git.chalmers.se/courses/dit638/students/group_01
@@ -38,7 +38,6 @@ stages:
   - test
 # Display information before we start the build.
 before_script:
-  - docker buildx rm ${BUILDX_BUILDER}
   - mkdir -p $HOME/.docker/cli-plugins/
   - wget -O $HOME/.docker/cli-plugins/docker-buildx $BUILDX_URL
   - chmod a+x $HOME/.docker/cli-plugins/docker-buildx
