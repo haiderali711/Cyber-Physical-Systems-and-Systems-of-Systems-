@@ -38,7 +38,7 @@ RUN mkdir build && \
     cd build && \
     cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/tmp .. && \
     make && \ 
-	 make install
+	make test && make install
 
 
 # Second stage for packaging the software into a software bundle:
