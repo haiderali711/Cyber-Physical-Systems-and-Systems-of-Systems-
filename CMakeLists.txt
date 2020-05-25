@@ -101,16 +101,16 @@ target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 
 #enable_testing()
 #add_executable(${PROJECT_NAME}-Runner 
-		${CMAKE_CURRENT_SOURCE_DIR}/Tests/TestConeDetection.cpp 
-		${CMAKE_CURRENT_SOURCE_DIR}/src/SteeringCalculator.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/ConeDetection.cpp)
+#		${CMAKE_CURRENT_SOURCE_DIR}/Tests/TestConeDetection.cpp 
+#		${CMAKE_CURRENT_SOURCE_DIR}/src/SteeringCalculator.cpp
+#		${CMAKE_CURRENT_SOURCE_DIR}/src/ConeDetection.cpp)
 #target_link_libraries(${PROJECT_NAME}-Runner ${LIBRARIES})
 #add_test(NAME ${PROJECT_NAME}-Runner COMMAND ${PROJECT_NAME}-Runner)
 
 #add_executable(${PROJECT_NAME}t2-Runner 
-        ${CMAKE_CURRENT_SOURCE_DIR}/Tests/TestSteeringCalc.cpp 
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/SteeringCalculator.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/ConeDetection.cpp)
+#        ${CMAKE_CURRENT_SOURCE_DIR}/Tests/TestSteeringCalc.cpp 
+#        ${CMAKE_CURRENT_SOURCE_DIR}/src/SteeringCalculator.cpp
+#        ${CMAKE_CURRENT_SOURCE_DIR}/src/ConeDetection.cpp)
 #target_link_libraries(${PROJECT_NAME}t2-Runner ${LIBRARIES})
 #add_test(NAME ${PROJECT_NAME}t2-Runner COMMAND ${PROJECT_NAME}-Runner)
 
